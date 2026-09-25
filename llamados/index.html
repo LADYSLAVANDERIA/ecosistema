@@ -9,14 +9,14 @@
 body{background:var(--albahaca);color:var(--leche);overflow:hidden}
 .wrap{display:grid;grid-template-columns:1fr 1.6fr;height:100%}
 .col{padding:4vh 3vw;display:flex;flex-direction:column;min-height:0}
-.prep{background:#16291E}
+.prep{background:#0B2A52}
 .ready{background:var(--semola);color:var(--albahaca)}
 h1{margin:0 0 2.5vh;font-family:"Young Serif",Georgia,serif;font-weight:400;font-size:clamp(28px,4vw,64px);line-height:1.05}
 .prep h1{color:var(--semola)}
 .list{display:flex;flex-wrap:wrap;gap:1.4vw;align-content:flex-start;overflow:hidden}
 .prep .t{background:rgba(255,255,255,.08);border-radius:14px;padding:1.2vh 1.4vw;min-width:9vw}
 .prep .t b{display:block;font-size:clamp(26px,3.4vw,56px);line-height:1}
-.prep .t span{font-size:clamp(14px,1.4vw,24px);color:#cfe0d4}
+.prep .t span{font-size:clamp(14px,1.4vw,24px);color:#D6E4F5}
 .ready .t{background:var(--leche);border-radius:22px;padding:2vh 2vw;min-width:16vw;border:4px solid transparent}
 .ready .t b{display:block;font-family:"Young Serif",Georgia,serif;font-weight:400;font-size:clamp(44px,6.5vw,120px);line-height:1}
 .ready .t span{font-size:clamp(20px,2.4vw,44px);font-weight:800}
@@ -24,10 +24,10 @@ h1{margin:0 0 2.5vh;font-family:"Young Serif",Georgia,serif;font-weight:400;font
 @keyframes flash{50%{transform:scale(1.05);background:#fff}}
 @media (prefers-reduced-motion: reduce){.ready .t.new{animation:none}}
 .empty{opacity:.7;font-size:clamp(18px,2vw,32px)}
-.overlay{position:fixed;inset:0;background:rgba(22,41,30,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;padding:24px}
+.overlay{position:fixed;inset:0;background:rgba(11,42,82,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;padding:24px}
 .overlay button{border:0;border-radius:999px;padding:22px 40px;background:var(--semola);color:var(--albahaca);font-weight:800;font-size:26px;cursor:pointer}
-.overlay p{font-size:20px;color:#cfe0d4;max-width:40ch}
-.bottom{position:fixed;left:0;right:0;bottom:0;padding:1vh 2vw;font-size:clamp(12px,1.1vw,18px);color:#9fb5a6;display:flex;justify-content:space-between;pointer-events:none}
+.overlay p{font-size:20px;color:#D6E4F5;max-width:40ch}
+.bottom{position:fixed;left:0;right:0;bottom:0;padding:1vh 2vw;font-size:clamp(12px,1.1vw,18px);color:#9DB4D3;display:flex;justify-content:space-between;pointer-events:none}
 @media (orientation:portrait){.wrap{grid-template-columns:1fr;grid-template-rows:auto 1fr}}
 </style></head>
 <body>
