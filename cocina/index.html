@@ -6,10 +6,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../base.css">
 <style>
-body{background:#0B2A52}
+body{background:#3D1029}
 .top{display:flex;align-items:center;gap:16px;padding:14px 22px;background:var(--albahaca);color:var(--semola)}
 .top h1{margin:0;font-size:26px;flex:1}
-.top .st{font-size:15px;color:#D6E4F5}
+.top .st{font-size:15px;color:#F6DCE7}
 .top button{border:2px solid var(--semola);background:transparent;color:var(--semola);border-radius:999px;padding:8px 16px;cursor:pointer;font-weight:700}
 .board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:14px;height:calc(100% - 64px)}
 .col{background:rgba(255,255,255,.05);border-radius:18px;display:flex;flex-direction:column;min-height:0}
@@ -26,7 +26,7 @@ body{background:#0B2A52}
 .card .acts{display:flex;gap:8px}
 .card .acts button{flex:1;border:0;border-radius:12px;padding:14px;font-weight:800;font-size:17px;cursor:pointer;background:var(--albahaca);color:var(--semola)}
 .card .acts button.x{flex:0 0 auto;background:transparent;color:var(--tomate);border:2px solid var(--tomate)}
-.empty{color:#9DB4D3;padding:10px 6px;font-size:16px}
+.empty{color:#D7A9BF;padding:10px 6px;font-size:16px}
 @media (max-width:900px){.board{grid-template-columns:1fr;height:auto}}
 </style></head>
 <body><div id="app" style="height:100%"></div>
@@ -35,14 +35,14 @@ body{background:#0B2A52}
 const COLS=[["recibido","Nuevos","Empezar"],["en_cocina","En cocina","Listo"],["listo","Listos para entregar","Entregado"]];
 const NEXT={recibido:"en_cocina",en_cocina:"listo",listo:"entregado"};
 const CANAL={totem:"Tótem",meson:"Mesón",whatsapp:"WhatsApp",web:"Web",pedidosya:"PedidosYa",rappi:"Rappi",ubereats:"Uber Eats"};
-let PIN=sessionStorage.getItem("eco_pin")||"",seen=new Set(),first=true,timer,ok=true;
+let PIN=(new URLSearchParams(location.search).get("k")||localStorage.getItem("eco_pin"))||"",seen=new Set(),first=true,timer,ok=true;
 const app=document.getElementById("app");
 function beep(){try{const c=new (window.AudioContext||window.webkitAudioContext)();[0,.18].forEach(t=>{const o=c.createOscillator(),g=c.createGain();o.frequency.value=880;o.connect(g);g.connect(c.destination);g.gain.setValueAtTime(.25,c.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+t+.15);o.start(c.currentTime+t);o.stop(c.currentTime+t+.16)})}catch(e){}}
 function login(msg){app.innerHTML=`<div class="pinbox"><form id="f"><h1 class="serif">Pantalla de cocina</h1><input id="p" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="PIN" aria-label="PIN de 6 dígitos"><p class="err">${msg||""}</p><button>Entrar</button></form></div>`;
  document.getElementById("p").focus();document.getElementById("f").onsubmit=e=>{e.preventDefault();PIN=document.getElementById("p").value.trim();load()}}
 async function load(){clearTimeout(timer);
- try{const d=await ECO.rpc("eco_cocina",{p_negocio:ECO.negocio,p_pin:PIN});sessionStorage.setItem("eco_pin",PIN);ok=true;draw(d)}
- catch(e){if(/PIN/.test(e.message)){sessionStorage.removeItem("eco_pin");return login("PIN incorrecto")}ok=false;const s=document.querySelector(".st");if(s)s.textContent="Sin conexión, reintentando…"}
+ try{const d=await ECO.rpc("eco_cocina",{p_negocio:ECO.negocio,p_pin:PIN});localStorage.setItem("eco_pin",PIN);ok=true;draw(d)}
+ catch(e){if(/PIN/.test(e.message)){localStorage.removeItem("eco_pin");return login("PIN incorrecto")}ok=false;const s=document.querySelector(".st");if(s)s.textContent="Sin conexión, reintentando…"}
  timer=setTimeout(load,3000)}
 function mins(t){return Math.floor((Date.now()-new Date(t))/60000)}
 function draw(list){
@@ -51,9 +51,9 @@ function draw(list){
  <div class="board">${COLS.map(([est,tit,btn])=>{const ps=list.filter(p=>p.estado===est);return `<section class="col"><h2><span>${tit}</span><span>${ps.length}</span></h2><div class="list">${ps.length?ps.map(p=>{const m=mins(p.creado);return `<article class="card ${m>=12?"late":m>=8?"warn":""}">
   <div class="h"><span class="n">${p.numero}${p.nombre?`<small style="display:block;font-family:Figtree,sans-serif;font-size:20px;font-weight:700">${p.nombre}</small>`:""}</span><span class="meta">${CANAL[p.canal]||p.canal} · ${p.modo==="llevar"?"Para llevar":p.modo==="despacho"?"Despacho":"Aquí"}<br>hace ${m} min</span></div>
   <ul>${(p.items||[]).map(i=>`<li><b>${i.pasta}</b> · ${i.salsa}${(i.extras||[]).length?`<small>+ ${i.extras.map(x=>x.nombre+(x.cantidad>1?" x"+x.cantidad:"")).join(", ")}</small>`:""}</li>`).join("")}</ul>
-  ${p.modo==="despacho"&&p.direccion?`<div class="nota" style="background:#E3ECF8">🛵 ${p.direccion.replace(/</g,"&lt;")}</div>`:""}${p.nota?`<div class="nota">${p.nota.replace(/</g,"&lt;")}</div>`:""}
+  ${p.modo==="despacho"&&p.direccion?`<div class="nota" style="background:#FBE7D6">🛵 ${p.direccion.replace(/</g,"&lt;")}</div>`:""}${p.nota?`<div class="nota">${p.nota.replace(/</g,"&lt;")}</div>`:""}
   <div class="acts">${est==="recibido"?`<button class="x" data-id="${p.id}" data-e="cancelado">Anular</button>`:""}${est==="listo"&&p.modo!=="despacho"?`<button class="x" style="color:var(--albahaca);border-color:var(--albahaca)" data-call="${p.id}">Volver a llamar</button>`:""}${est==="listo"&&p.modo==="despacho"?`<span style="flex:1;text-align:center;font-weight:800;color:var(--tomate);padding:14px">Esperando repartidor</span>`:`<button data-id="${p.id}" data-e="${NEXT[est]}">${est==="en_cocina"&&p.modo==="despacho"?"Listo para despacho":btn}</button>`}</div></article>`}).join(""):`<p class="empty">Sin pedidos</p>`}</div></section>`}).join("")}</div>`;
- document.getElementById("out").onclick=()=>{sessionStorage.removeItem("eco_pin");PIN="";clearTimeout(timer);login()};
+ document.getElementById("out").onclick=()=>{localStorage.removeItem("eco_pin");PIN="";clearTimeout(timer);login()};
  app.querySelectorAll("[data-call]").forEach(b=>b.onclick=async()=>{b.disabled=true;try{await ECO.rpc("eco_rellamar",{p_negocio:ECO.negocio,p_pin:PIN,p_pedido:b.dataset.call})}catch(e){alert(e.message)}b.disabled=false});
  app.querySelectorAll("[data-id]").forEach(b=>b.onclick=async()=>{if(b.dataset.e==="cancelado"&&!confirm("¿Anular este pedido?"))return;b.disabled=true;
   try{await ECO.rpc("eco_cambiar_estado",{p_negocio:ECO.negocio,p_pin:PIN,p_pedido:b.dataset.id,p_estado:b.dataset.e});load()}catch(e){alert("No se pudo actualizar: "+e.message);b.disabled=false}});

@@ -31,14 +31,14 @@ h2{font-size:18px;margin:18px 4px 8px;display:flex;justify-content:space-between
 <script src="../api.js"></script>
 <script>
 const app=document.getElementById("app"),esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-let PIN=sessionStorage.getItem("eco_pin")||"",YO=localStorage.getItem("eco_repartidor")||"",list=[],timer,watch=null,last=null,lastSent=0,gpsMsg="",lock=null;
+let PIN=(new URLSearchParams(location.search).get("k")||localStorage.getItem("eco_pin"))||"",YO=localStorage.getItem("eco_repartidor")||"",list=[],timer,watch=null,last=null,lastSent=0,gpsMsg="",lock=null;
 function login(m){app.innerHTML=`<div class="pinbox"><form id="f"><h1 class="serif">Reparto</h1><input id="y" placeholder="Tu nombre" value="${esc(YO)}" maxlength="30" style="letter-spacing:0;font-size:22px"><input id="p" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="PIN" aria-label="PIN de 6 dígitos"><p class="err">${m||""}</p><button>Entrar</button></form></div>`;
  document.getElementById("f").onsubmit=e=>{e.preventDefault();YO=document.getElementById("y").value.trim();PIN=document.getElementById("p").value.trim();if(!YO)return login("Escribe tu nombre");localStorage.setItem("eco_repartidor",YO);load()}}
 const trackUrl=t=>new URL("../seguimiento/?t="+t,location.href).href;
 const mine=()=>list.filter(p=>p.estado==="en_ruta"&&p.repartidor===YO);
 async function load(){clearTimeout(timer);
- try{list=await ECO.rpc("eco_reparto",{p_negocio:ECO.negocio,p_pin:PIN});sessionStorage.setItem("eco_pin",PIN);draw();gps()}
- catch(e){if(/PIN/.test(e.message)){sessionStorage.removeItem("eco_pin");return login("PIN incorrecto")}gpsMsg="Sin conexión, reintentando…"}
+ try{list=await ECO.rpc("eco_reparto",{p_negocio:ECO.negocio,p_pin:PIN});localStorage.setItem("eco_pin",PIN);draw();gps()}
+ catch(e){if(/PIN/.test(e.message)){localStorage.removeItem("eco_pin");return login("PIN incorrecto")}gpsMsg="Sin conexión, reintentando…"}
  timer=setTimeout(load,8000)}
 function gps(){const need=mine().length>0;
  if(need&&watch===null){if(!navigator.geolocation){gpsMsg="Este teléfono no permite GPS";return}
@@ -68,7 +68,7 @@ function draw(){const g={listo:[],en_ruta:[],prep:[],entregado:[]};list.forEach(
   <h2><span>En cocina</span><span>${g.prep.length}</span></h2>${g.prep.map(p=>`<article class="card"><div class="h"><span class="n">${p.numero}</span><span class="meta">${esc(p.nombre)}</span></div><div class="meta">${esc(p.direccion)}</div></article>`).join("")||`<p class="empty">Nada en preparación.</p>`}
   ${g.entregado.length?`<h2><span>Entregados (30 min)</span><span>${g.entregado.length}</span></h2>${g.entregado.map(card).join("")}`:""}
  </main>`;
- document.getElementById("out").onclick=()=>{sessionStorage.removeItem("eco_pin");PIN="";clearTimeout(timer);login()};
+ document.getElementById("out").onclick=()=>{localStorage.removeItem("eco_pin");PIN="";clearTimeout(timer);login()};
  app.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>{if(b.dataset.e==="entregado"&&!confirm("¿Confirmas que entregaste el pedido?"))return;b.disabled=true;estado(b.dataset.id,b.dataset.e)});
 }
 setInterval(()=>send(),15000);

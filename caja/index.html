@@ -17,17 +17,17 @@ h2{margin:0 0 10px;font-size:19px}
 .chip{border:2px solid var(--albahaca);background:transparent;color:var(--albahaca);border-radius:999px;padding:10px 14px;font-weight:700;cursor:pointer}
 .chip.sel{background:var(--albahaca);color:var(--semola)}
 .chip small{font-weight:500}
-.exq{display:inline-flex;align-items:center;gap:6px;border:2px solid #E6DCEB;border-radius:999px;padding:4px 6px 4px 12px}
+.exq{display:inline-flex;align-items:center;gap:6px;border:2px solid #EFD9D2;border-radius:999px;padding:4px 6px 4px 12px}
 .exq button{width:32px;height:32px;border-radius:50%;border:0;background:var(--semola-2);font-weight:800;cursor:pointer}
 .go{border:0;border-radius:999px;padding:14px 22px;background:var(--albahaca);color:var(--semola);font-weight:800;font-size:17px;cursor:pointer}
 .go.red{background:var(--tomate);color:#fff}
 .go:disabled{opacity:.35;cursor:not-allowed}
-.line{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px dashed #E6DCEB}
+.line{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px dashed #EFD9D2}
 .line small{display:block;color:var(--gris)}
 .line button{background:none;border:0;color:var(--tomate);font-weight:700;cursor:pointer;padding:0}
 .total{display:flex;justify-content:space-between;font-size:22px;font-weight:800;padding:12px 0}
 label{display:block;font-weight:700;margin:10px 0 4px}
-input,textarea,select{font:inherit;width:100%;padding:10px 12px;border-radius:10px;border:2px solid #E6DCEB;background:#fff}
+input,textarea,select{font:inherit;width:100%;padding:10px 12px;border-radius:10px;border:2px solid #EFD9D2;background:#fff}
 .seg{display:flex;gap:6px}.seg .chip{flex:1}
 .ok{background:var(--albahaca);color:var(--semola);border-radius:18px;padding:18px;margin-top:14px}
 .ok b.n{font-family:"Young Serif",Georgia,serif;font-weight:400;font-size:54px;display:block;line-height:1}
@@ -40,13 +40,13 @@ input,textarea,select{font:inherit;width:100%;padding:10px 12px;border-radius:10
 <script src="../api.js"></script>
 <script>
 const app=document.getElementById("app");
-let PIN=sessionStorage.getItem("eco_pin")||"",P=[],SA=[],EX=[],cur,cart=[],F={canal:"meson",modo:"llevar",nombre:"",tel:"",dir:"",nota:""},res=null,msg="";
+let PIN=(new URLSearchParams(location.search).get("k")||localStorage.getItem("eco_pin"))||"",P=[],SA=[],EX=[],cur,cart=[],F={canal:"meson",modo:"llevar",nombre:"",tel:"",dir:"",nota:""},res=null,msg="";
 const esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 function newCur(){cur={pasta:null,salsa:null,extras:{}}}newCur();
 const price=i=>i.pasta.precio+i.salsa.precio+Object.entries(i.extras).reduce((a,[k,q])=>a+EX.find(e=>e.codigo===k).precio*q,0);
 function login(m){app.innerHTML=`<div class="pinbox"><form id="f"><h1 class="serif">Caja</h1><input id="p" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="PIN" aria-label="PIN de 6 dígitos"><p class="err">${m||""}</p><button>Entrar</button></form></div>`;
  document.getElementById("p").focus();document.getElementById("f").onsubmit=async e=>{e.preventDefault();PIN=document.getElementById("p").value.trim();
-  try{await ECO.rpc("eco_cocina",{p_negocio:ECO.negocio,p_pin:PIN});sessionStorage.setItem("eco_pin",PIN);init()}catch(x){login("PIN incorrecto")}}}
+  try{await ECO.rpc("eco_cocina",{p_negocio:ECO.negocio,p_pin:PIN});localStorage.setItem("eco_pin",PIN);init()}catch(x){login("PIN incorrecto")}}}
 async function init(){const c=await ECO.rpc("eco_carta",{p_negocio:ECO.negocio});P=c.productos.filter(p=>p.tipo==="pasta");SA=c.productos.filter(p=>p.tipo==="salsa");EX=c.productos.filter(p=>p.tipo==="extra");draw()}
 function trackUrl(t){return new URL("../seguimiento/?t="+t,location.href).href}
 function draw(skip){
@@ -74,7 +74,7 @@ function draw(skip){
    ${res.modo==="despacho"?`<p>Seguimiento: <a href="${trackUrl(res.token)}" target="_blank" rel="noopener">${trackUrl(res.token)}</a></p><div class="acts">${res.telefono?`<a target="_blank" rel="noopener" href="https://wa.me/${res.telefono}?text=${encodeURIComponent(`Hola ${res.nombre||""}! Tu pedido #${res.numero} ya está en preparación 🍝 Sigue tu despacho en vivo aquí: ${trackUrl(res.token)}`)}">Enviar seguimiento por WhatsApp</a>`:""}<button id="cp">Copiar enlace</button></div>`:""}</div>`:""}
  </section></div>`;
  const $=id=>document.getElementById(id);
- $("out").onclick=()=>{sessionStorage.removeItem("eco_pin");PIN="";login()};
+ $("out").onclick=()=>{localStorage.removeItem("eco_pin");PIN="";login()};
  app.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{cur.pasta=P.find(p=>p.codigo===b.dataset.p);draw()});
  app.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{cur.salsa=SA.find(s=>s.codigo===b.dataset.s);draw()});
  app.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>{const k=b.dataset.x;cur.extras[k]=Math.max(0,Math.min(3,(cur.extras[k]||0)+ +b.dataset.d));draw()});

@@ -1,4 +1,4 @@
-:root{--semola:#F3EEE6;--semola-2:#F7E1EC;--albahaca:#123E75;--albahaca-2:#1F5AA6;--tomate:#C71F6E;--leche:#FFFFFF;--tinta:#123E75;--gris:#5B6B7F;
+:root{--semola:#FBF1E6;--semola-2:#FBE0E6;--albahaca:#7A1F4F;--albahaca-2:#A8336F;--tomate:#D4541F;--leche:#FFFFFF;--tinta:#7A1F4F;--gris:#7A6470;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *,*::before,*::after{box-sizing:inherit}
 html,body{height:100%;margin:0}
@@ -14,3 +14,4 @@ button{font:inherit}
 .err{color:var(--tomate);font-weight:700;min-height:1.2em;margin:0}
 
 header.top{border-bottom:6px solid var(--tomate)}
+#out{display:none}

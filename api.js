@@ -17,3 +17,5 @@ const ECO = {
   }
 };
 const clp = n => "$" + Number(n || 0).toLocaleString("es-CL");
+// Activación por enlace: ?k=PIN guarda el acceso en este dispositivo y limpia la URL.
+(function(){const q=new URLSearchParams(location.search);if(q.has("k")){localStorage.setItem("eco_pin",q.get("k"));q.delete("k");history.replaceState(null,"",location.pathname+(q.toString()?"?"+q:""))}})();
