@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sigue tu pedido</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="../base.css">
+<style>
+body{background:var(--semola)}
+header.top{padding:18px 20px;background:var(--albahaca);color:var(--semola)}
+header.top b{font-family:"Young Serif",Georgia,serif;font-weight:400;font-size:24px}
+main{max-width:560px;margin:0 auto;padding:18px 16px 40px}
+.hero{background:var(--leche);border-radius:20px;padding:20px}
+.hero .n{font-family:"Young Serif",Georgia,serif;font-size:20px;color:var(--gris)}
+.hero h1{margin:4px 0 6px;font-size:30px;line-height:1.15}
+.hero p{margin:0;color:var(--gris)}
+ol{list-style:none;margin:18px 0 0;padding:0}
+ol li{display:flex;gap:14px;align-items:flex-start;padding:0 0 18px;position:relative}
+ol li::before{content:"";position:absolute;left:13px;top:28px;bottom:0;width:3px;background:#E6DCEB}
+ol li:last-child::before{display:none}
+ol i{flex:none;width:30px;height:30px;border-radius:50%;border:3px solid #E6DCEB;background:#fff;position:relative;z-index:1}
+ol li.done i{background:var(--albahaca);border-color:var(--albahaca)}
+ol li.now i{background:var(--tomate);border-color:var(--tomate);box-shadow:0 0 0 6px rgba(199,31,110,.18)}
+ol b{display:block;font-size:17px}ol span{color:var(--gris);font-size:14px}
+ol li.todo b{color:var(--gris);font-weight:500}
+#map{height:300px;border-radius:20px;margin-top:16px;overflow:hidden;background:#E6DCEB}
+.upd{font-size:14px;color:var(--gris);margin-top:6px}
+.moto{font-size:30px;line-height:1;filter:drop-shadow(0 2px 3px rgba(0,0,0,.3))}
+@media (prefers-reduced-motion: no-preference){ol li.now i{animation:pul 1.6s ease-in-out infinite}@keyframes pul{50%{box-shadow:0 0 0 12px rgba(199,31,110,.05)}}}
+</style></head>
+<body><header class="top"><b id="neg">Tu pedido</b></header><main id="app"><p>Cargando…</p></main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="../api.js"></script>
+<script>
+const T=new URLSearchParams(location.search).get("t")||"",app=document.getElementById("app"),esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let map,marker,timer;
+const hh=t=>t?new Date(t).toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"}):"";
+async function load(){clearTimeout(timer);
+ try{const d=await ECO.rpc("eco_seguimiento",{p_token:T});if(!d){app.innerHTML=`<div class="hero"><h1>No encontramos este pedido</h1><p>Revisa que el enlace esté completo.</p></div>`;return}draw(d)}
+ catch(e){}
+ timer=setTimeout(load,10000)}
+function draw(d){
+ document.getElementById("neg").textContent=d.negocio;document.title="Pedido "+d.numero+" · "+d.negocio;
+ const desp=d.modo==="despacho";
+ const steps=[["recibido","Recibimos tu pedido",d.creado],["en_cocina","Preparando tu pasta",null],["listo",desp?"Listo para salir":"Listo para retirar",d.listo_en]];
+ if(desp)steps.push(["en_ruta",`En camino${d.repartidor?" con "+esc(d.repartidor):""}`,d.en_ruta_en],["entregado","Entregado",d.entregado_en]);else steps.push(["entregado","Retirado",d.entregado_en]);
+ const order=steps.map(s=>s[0]);let idx=order.indexOf(d.estado);if(d.estado==="cancelado")idx=-1;
+ const title={recibido:"Recibimos tu pedido",en_cocina:"Estamos preparando tu pasta",listo:desp?"Tu pedido está listo y sale pronto":"Tu pedido está listo, pasa a retirarlo",en_ruta:"Tu pedido va en camino",entregado:"Pedido entregado. ¡Buen provecho!",cancelado:"Este pedido fue anulado"}[d.estado];
+ app.innerHTML=`<div class="hero"><span class="n">Pedido ${d.numero}${d.nombre?" · "+esc(d.nombre):""}</span><h1>${title}</h1>${desp&&d.direccion?`<p>Entrega en ${esc(d.direccion)}</p>`:""}
+  ${d.estado==="cancelado"?"":`<ol>${steps.map((s,i)=>`<li class="${i<idx?"done":i===idx?"now":"todo"}"><i></i><div><b>${s[1]}</b><span>${i<=idx&&s[2]?hh(s[2]):""}</span></div></li>`).join("")}</ol>`}</div>
+  ${d.estado==="en_ruta"&&d.lat?`<div id="map" role="img" aria-label="Mapa con la ubicación del repartidor"></div><p class="upd">Ubicación del repartidor actualizada a las ${hh(d.pos_en)}</p>`:d.estado==="en_ruta"?`<p class="upd">El repartidor está saliendo; el mapa aparece en cuanto comparta su ubicación.</p>`:""}`;
+ map=null;if(d.estado==="en_ruta"&&d.lat&&window.L){map=L.map("map",{zoomControl:false,attributionControl:true}).setView([d.lat,d.lng],15);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(map);
+  L.marker([d.lat,d.lng],{icon:L.divIcon({className:"",html:'<div class="moto">🛵</div>',iconSize:[34,34],iconAnchor:[17,17]})}).addTo(map)}
+}
+T?load():app.innerHTML=`<div class="hero"><h1>Falta el código del pedido</h1><p>Abre el enlace que te enviamos por WhatsApp.</p></div>`;
+</script></body></html>

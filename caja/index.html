@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Caja · Pasta al paso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../base.css">
+<style>
+body{background:var(--semola)}
+.top{display:flex;align-items:center;gap:14px;padding:14px 22px;background:var(--albahaca);color:var(--semola)}
+.top h1{margin:0;font-size:26px;flex:1}
+.top button{border:2px solid var(--semola);background:transparent;color:var(--semola);border-radius:999px;padding:8px 16px;cursor:pointer;font-weight:700}
+.wrap{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;padding:18px;max-width:1300px;margin:0 auto}
+section{background:var(--leche);border-radius:18px;padding:18px}
+h2{margin:0 0 10px;font-size:19px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.chip{border:2px solid var(--albahaca);background:transparent;color:var(--albahaca);border-radius:999px;padding:10px 14px;font-weight:700;cursor:pointer}
+.chip.sel{background:var(--albahaca);color:var(--semola)}
+.chip small{font-weight:500}
+.exq{display:inline-flex;align-items:center;gap:6px;border:2px solid #E6DCEB;border-radius:999px;padding:4px 6px 4px 12px}
+.exq button{width:32px;height:32px;border-radius:50%;border:0;background:var(--semola-2);font-weight:800;cursor:pointer}
+.go{border:0;border-radius:999px;padding:14px 22px;background:var(--albahaca);color:var(--semola);font-weight:800;font-size:17px;cursor:pointer}
+.go.red{background:var(--tomate);color:#fff}
+.go:disabled{opacity:.35;cursor:not-allowed}
+.line{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px dashed #E6DCEB}
+.line small{display:block;color:var(--gris)}
+.line button{background:none;border:0;color:var(--tomate);font-weight:700;cursor:pointer;padding:0}
+.total{display:flex;justify-content:space-between;font-size:22px;font-weight:800;padding:12px 0}
+label{display:block;font-weight:700;margin:10px 0 4px}
+input,textarea,select{font:inherit;width:100%;padding:10px 12px;border-radius:10px;border:2px solid #E6DCEB;background:#fff}
+.seg{display:flex;gap:6px}.seg .chip{flex:1}
+.ok{background:var(--albahaca);color:var(--semola);border-radius:18px;padding:18px;margin-top:14px}
+.ok b.n{font-family:"Young Serif",Georgia,serif;font-weight:400;font-size:54px;display:block;line-height:1}
+.ok a{color:var(--semola);word-break:break-all}
+.ok .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.ok .acts a,.ok .acts button{background:var(--semola);color:var(--albahaca);border:0;border-radius:999px;padding:10px 16px;font-weight:800;text-decoration:none;cursor:pointer}
+@media (max-width:860px){.wrap{grid-template-columns:1fr}}
+</style></head>
+<body><div id="app"></div>
+<script src="../api.js"></script>
+<script>
+const app=document.getElementById("app");
+let PIN=sessionStorage.getItem("eco_pin")||"",P=[],SA=[],EX=[],cur,cart=[],F={canal:"meson",modo:"llevar",nombre:"",tel:"",dir:"",nota:""},res=null,msg="";
+const esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function newCur(){cur={pasta:null,salsa:null,extras:{}}}newCur();
+const price=i=>i.pasta.precio+i.salsa.precio+Object.entries(i.extras).reduce((a,[k,q])=>a+EX.find(e=>e.codigo===k).precio*q,0);
+function login(m){app.innerHTML=`<div class="pinbox"><form id="f"><h1 class="serif">Caja</h1><input id="p" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="PIN" aria-label="PIN de 6 dígitos"><p class="err">${m||""}</p><button>Entrar</button></form></div>`;
+ document.getElementById("p").focus();document.getElementById("f").onsubmit=async e=>{e.preventDefault();PIN=document.getElementById("p").value.trim();
+  try{await ECO.rpc("eco_cocina",{p_negocio:ECO.negocio,p_pin:PIN});sessionStorage.setItem("eco_pin",PIN);init()}catch(x){login("PIN incorrecto")}}}
+async function init(){const c=await ECO.rpc("eco_carta",{p_negocio:ECO.negocio});P=c.productos.filter(p=>p.tipo==="pasta");SA=c.productos.filter(p=>p.tipo==="salsa");EX=c.productos.filter(p=>p.tipo==="extra");draw()}
+function trackUrl(t){return new URL("../seguimiento/?t="+t,location.href).href}
+function draw(skip){
+ if(!skip)keep();
+ const tot=cart.reduce((a,i)=>a+price(i),0);
+ app.innerHTML=`<header class="top"><h1 class="serif">Caja</h1><button id="out">Salir</button></header>
+ <div class="wrap"><section>
+  <h2>Pasta</h2><div class="chips">${P.map(p=>`<button class="chip ${cur.pasta===p?"sel":""}" data-p="${p.codigo}">${p.nombre} <small>${clp(p.precio)}</small></button>`).join("")}</div>
+  <h2>Salsa</h2><div class="chips">${SA.map(s=>`<button class="chip ${cur.salsa===s?"sel":""}" data-s="${s.codigo}">${s.nombre}${s.precio?` <small>+${clp(s.precio)}</small>`:""}</button>`).join("")}</div>
+  <h2>Extras</h2><div class="chips">${EX.map(e=>`<span class="exq">${e.nombre} <small>+${clp(e.precio)}</small><button data-x="${e.codigo}" data-d="-1" aria-label="Quitar ${e.nombre}">−</button><b>${cur.extras[e.codigo]||0}</b><button data-x="${e.codigo}" data-d="1" aria-label="Agregar ${e.nombre}">+</button></span>`).join("")}</div>
+  <button class="go" id="add" ${cur.pasta&&cur.salsa?"":"disabled"}>Agregar plato${cur.pasta&&cur.salsa?" · "+clp(price(cur)):""}</button>
+ </section>
+ <section><h2>Pedido</h2>
+  ${cart.length?cart.map((i,k)=>`<div class="line"><div><b>${i.pasta.nombre} · ${i.salsa.nombre}</b><small>${Object.entries(i.extras).filter(([,q])=>q).map(([c,q])=>EX.find(e=>e.codigo===c).nombre+(q>1?" x"+q:"")).join(", ")||"Sin extras"}</small><button data-del="${k}">Quitar</button></div><b>${clp(price(i))}</b></div>`).join(""):`<p style="color:var(--gris)">Agrega platos desde la izquierda.</p>`}
+  <div class="total"><span>Total</span><span>${clp(tot)}</span></div>
+  <label>Canal</label><div class="seg">${[["meson","Mesón"],["whatsapp","WhatsApp / teléfono"]].map(([v,t])=>`<button class="chip ${F.canal===v?"sel":""}" data-c="${v}">${t}</button>`).join("")}</div>
+  <label>Entrega</label><div class="seg">${[["aqui","Aquí"],["llevar","Para llevar"],["despacho","Despacho"]].map(([v,t])=>`<button class="chip ${F.modo===v?"sel":""}" data-m="${v}">${t}</button>`).join("")}</div>
+  <label for="n">Nombre</label><input id="n" value="${esc(F.nombre)}" maxlength="20" autocomplete="off">
+  <label for="t">Celular ${F.modo==="despacho"?"(obligatorio)":"(opcional, suma sellos)"}</label><input id="t" value="${esc(F.tel)}" inputmode="tel" placeholder="9 1234 5678">
+  ${F.modo==="despacho"?`<label for="d">Dirección de despacho</label><input id="d" value="${esc(F.dir)}" maxlength="160" placeholder="Calle, número, depto, comuna">`:""}
+  <label for="o">Nota para cocina o reparto</label><textarea id="o" rows="2" maxlength="280">${esc(F.nota)}</textarea>
+  <p class="err">${esc(msg)}</p>
+  <button class="go red" id="send" style="width:100%" ${cart.length?"":"disabled"}>Crear pedido · ${clp(tot)}</button>
+  ${res?`<div class="ok"><span>Pedido creado</span><b class="n">${res.numero}</b>${res.nombre?`<span>${esc(res.nombre)}</span>`:""}
+   ${res.modo==="despacho"?`<p>Seguimiento: <a href="${trackUrl(res.token)}" target="_blank" rel="noopener">${trackUrl(res.token)}</a></p><div class="acts">${res.telefono?`<a target="_blank" rel="noopener" href="https://wa.me/${res.telefono}?text=${encodeURIComponent(`Hola ${res.nombre||""}! Tu pedido #${res.numero} ya está en preparación 🍝 Sigue tu despacho en vivo aquí: ${trackUrl(res.token)}`)}">Enviar seguimiento por WhatsApp</a>`:""}<button id="cp">Copiar enlace</button></div>`:""}</div>`:""}
+ </section></div>`;
+ const $=id=>document.getElementById(id);
+ $("out").onclick=()=>{sessionStorage.removeItem("eco_pin");PIN="";login()};
+ app.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{cur.pasta=P.find(p=>p.codigo===b.dataset.p);draw()});
+ app.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{cur.salsa=SA.find(s=>s.codigo===b.dataset.s);draw()});
+ app.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>{const k=b.dataset.x;cur.extras[k]=Math.max(0,Math.min(3,(cur.extras[k]||0)+ +b.dataset.d));draw()});
+ app.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{cart.splice(+b.dataset.del,1);draw()});
+ app.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{keep();F.canal=b.dataset.c;draw()});
+ app.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{keep();F.modo=b.dataset.m;draw()});
+ $("add").onclick=()=>{keep();cart.push({...cur,extras:{...cur.extras}});newCur();res=null;draw()};
+ if($("cp"))$("cp").onclick=()=>navigator.clipboard&&navigator.clipboard.writeText(trackUrl(res.token));
+ $("send").onclick=async()=>{keep();msg="";const b=$("send");b.disabled=true;
+  try{const items=cart.map(i=>({pasta:i.pasta.codigo,salsa:i.salsa.codigo,extras:Object.entries(i.extras).filter(([,q])=>q).map(([codigo,cantidad])=>({codigo,cantidad}))}));
+   const r=await ECO.rpc("eco_crear_pedido",{p_negocio:ECO.negocio,p_canal:F.canal,p_modo:F.modo,p_items:items,p_telefono:F.tel||null,p_nota:F.nota||null,p_nombre:F.nombre||null,p_direccion:F.modo==="despacho"?F.dir:null});
+   res={...r,modo:F.modo};cart=[];F={canal:F.canal,modo:"llevar",nombre:"",tel:"",dir:"",nota:""};draw(true)}
+  catch(e){msg=e.message;draw()}};
+}
+function keep(){const g=id=>{const e=document.getElementById(id);return e?e.value:undefined};
+ if(g("n")!==undefined)F.nombre=g("n");if(g("t")!==undefined)F.tel=g("t");if(g("d")!==undefined)F.dir=g("d");if(g("o")!==undefined)F.nota=g("o")}
+PIN?init().catch(()=>login()):login();
+</script></body></html>
