@@ -4,7 +4,7 @@
 <title>Cocina · Pasta al paso</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../base.css?v=6">
+<link rel="stylesheet" href="../base.css?v=7">
 <style>
 body{background:#06434B}
 .top{display:flex;align-items:center;gap:16px;padding:14px 22px;background:var(--albahaca);color:var(--semola)}
@@ -30,7 +30,7 @@ body{background:#06434B}
 @media (max-width:900px){.board{grid-template-columns:1fr;height:auto}}
 </style></head>
 <body><div id="app" style="height:100%"></div>
-<script src="../api.js?v=6"></script>
+<script src="../api.js?v=7"></script>
 <script>
 const COLS=[["recibido","Nuevos","Empezar"],["en_cocina","En cocina","Listo"],["listo","Listos para entregar","Entregado"]];
 const NEXT={recibido:"en_cocina",en_cocina:"listo",listo:"entregado"};
@@ -50,7 +50,7 @@ function draw(list){
  app.innerHTML=`<header class="top"><h1 class="serif">Cocina</h1><span class="st">${ok?"En línea · "+new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"}):""}</span><button id="out">Salir</button></header>
  <div class="board">${COLS.map(([est,tit,btn])=>{const ps=list.filter(p=>p.estado===est);return `<section class="col"><h2><span>${tit}</span><span>${ps.length}</span></h2><div class="list">${ps.length?ps.map(p=>{const m=mins(p.creado);return `<article class="card ${m>=12?"late":m>=8?"warn":""}">
   <div class="h"><span class="n">${p.numero}${p.nombre?`<small style="display:block;font-family:Figtree,sans-serif;font-size:20px;font-weight:700">${p.nombre}</small>`:""}</span><span class="meta">${CANAL[p.canal]||p.canal} · ${p.modo==="llevar"?"Para llevar":p.modo==="despacho"?"Despacho":"Aquí"}<br>hace ${m} min</span></div>
-  <ul>${(p.items||[]).map(i=>`<li><b>${i.pasta}</b> · ${i.salsa}${(i.extras||[]).length?`<small>+ ${i.extras.map(x=>x.nombre+(x.cantidad>1?" x"+x.cantidad:"")).join(", ")}</small>`:""}</li>`).join("")}</ul>
+  <div style="margin-top:6px;font-size:14px;font-weight:800;color:${p.pagado?"#1D5E36":"var(--tomate)"}">${p.pagado?"Pagado"+(p.metodo_pago?" · "+p.metodo_pago.replace("_simulado"," (simulado)").replace("debito","débito").replace("credito","crédito"):""):"Por cobrar"}</div><ul>${(p.items||[]).map(i=>`<li><b>${i.pasta}</b> · ${i.salsa}${(i.extras||[]).length?`<small>+ ${i.extras.map(x=>x.nombre+(x.cantidad>1?" x"+x.cantidad:"")).join(", ")}</small>`:""}</li>`).join("")}</ul>
   ${p.modo==="despacho"&&p.direccion?`<div class="nota" style="background:#E0F6F8">🛵 ${p.direccion.replace(/</g,"&lt;")}</div>`:""}${p.nota?`<div class="nota">${p.nota.replace(/</g,"&lt;")}</div>`:""}
   <div class="acts">${est==="recibido"?`<button class="x" data-id="${p.id}" data-e="cancelado">Anular</button>`:""}${est==="listo"&&p.modo!=="despacho"?`<button class="x" style="color:var(--albahaca);border-color:var(--albahaca)" data-call="${p.id}">Volver a llamar</button>`:""}${est==="listo"&&p.modo==="despacho"?`<span style="flex:1;text-align:center;font-weight:800;color:var(--tomate);padding:14px">Esperando repartidor</span>`:`<button data-id="${p.id}" data-e="${NEXT[est]}">${est==="en_cocina"&&p.modo==="despacho"?"Listo para despacho":btn}</button>`}</div></article>`}).join(""):`<p class="empty">Sin pedidos</p>`}</div></section>`}).join("")}</div>`;
  document.getElementById("out").onclick=()=>{localStorage.removeItem("eco_pin");PIN="";clearTimeout(timer);login()};

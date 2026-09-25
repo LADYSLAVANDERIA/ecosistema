@@ -76,11 +76,17 @@ footer.bar{display:flex;gap:12px;align-items:center;padding:16px 28px 22px;backg
 .note{font-size:17px;color:var(--gris);max-width:30ch}
 .spinner{width:64px;height:64px;border-radius:50%;border:7px solid rgba(0,124,137,.2);border-top-color:var(--albahaca);animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+.sim{background:var(--semola-2);color:var(--tomate);font-weight:800;font-size:15px;border-radius:999px;padding:6px 14px}
+.pos{width:230px;background:#1c2b2e;border-radius:26px;padding:16px;box-shadow:0 14px 30px rgba(0,0,0,.25)}
+.pos .scr{background:#DDF3F5;border-radius:10px;padding:14px;font-weight:800;font-size:26px;color:#06434B;text-align:center}
+.pos .scr small{display:block;font-size:14px;font-weight:600}
+.pos .kp{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.pos .kp i{font-style:normal;background:#2f4448;color:#fff;border-radius:8px;padding:8px 0;text-align:center;font-weight:700}
 .proto{position:absolute;right:10px;bottom:6px;font-size:12px;color:rgba(0,124,137,.55)}
 @media (max-width:480px){.grid{grid-template-columns:1fr}.opt{min-height:0}.btn{padding:16px 22px;font-size:18px}}
 </style></head>
 <body><div class="kiosk" id="app"><main><p class="sub">Cargando carta…</p></main></div>
-<script src="../api.js?v=6"></script>
+<script src="../api.js?v=7"></script>
 <script>let PASTAS=[],SALSAS=[],EXTRAS=[],NOMBRE="Pasta al paso";
 let S,cart,idle;
 function reset(){S={step:0,pasta:null,salsa:null,extras:{},modo:null,phone:"",nombre:"",err:""};cart=[];render()}
@@ -89,21 +95,23 @@ function itemPrice(it){return it.pasta.precio+it.salsa.precio+Object.entries(it.
 function current(){return S.pasta&&S.salsa?{pasta:S.pasta,salsa:S.salsa,extras:{...S.extras}}:null}
 function total(){return cart.reduce((a,i)=>a+itemPrice(i),0)}
 function bowl(pc,sc,cls){return `<svg class="${cls||"bowl"}" viewBox="0 0 120 90" aria-hidden="true"><ellipse cx="60" cy="32" rx="52" ry="14" fill="${pc||"#FFFFFF"}"/>${sc?`<ellipse cx="48" cy="30" rx="18" ry="6" fill="${sc}"/><ellipse cx="72" cy="33" rx="14" ry="5" fill="${sc}"/>`:""}<path d="M8 32 Q60 110 112 32" fill="#FFFFFF" stroke="#007C89" stroke-width="4"/><ellipse cx="60" cy="32" rx="52" ry="14" fill="none" stroke="#007C89" stroke-width="4"/></svg>`}
-function poke(){clearTimeout(idle);if(S&&S.step>0&&S.step<7)idle=setTimeout(reset,90000)}
+function poke(){clearTimeout(idle);if(S&&[1,2,3,4,5,9,10].includes(S.step))idle=setTimeout(reset,90000)}
 const brand=()=>`<header class="top"><div class="brand">${NOMBRE}<small>Pasta fresca al paso</small></div></header>`;
-async function enviar(){
-  S.step=6;S.err="";render();
+async function enviar(metodo){
+  S.metodo=metodo||null;S.step=6;S.err="";render();
+  if(metodo)await new Promise(r=>setTimeout(r,2600));
   try{
     const items=cart.map(i=>({pasta:i.pasta.codigo,salsa:i.salsa.codigo,extras:Object.entries(i.extras).filter(([,q])=>q).map(([codigo,cantidad])=>({codigo,cantidad}))}));
     const r=await ECO.rpc("eco_crear_pedido",{p_negocio:ECO.negocio,p_canal:"totem",p_modo:S.modo,p_items:items,p_telefono:S.phone.length===8?S.phone:null,p_nombre:S.nombre});
+    if(metodo){await ECO.rpc("eco_registrar_pago",{p_token:r.token,p_metodo:metodo});r.pagado=true}
     S.res=r;S.step=7;render();
-  }catch(e){S.err="No pudimos enviar tu pedido. Intenta de nuevo o pide en caja.";S.step=5;render()}
+  }catch(e){S.err=metodo?"El pago no se completó. Intenta de nuevo o paga en caja.":"No pudimos enviar tu pedido. Intenta de nuevo o pide en caja.";S.step=5;render()}
 }
 function render(){
  poke();const a=document.getElementById("app");
  if(S.step===0){a.innerHTML=brand()+`<div class="attract" id="start" role="button" tabindex="0" aria-label="Empezar pedido">${bowl("#E9C46A","#C8372D","big pulse")}<h1>Tu pasta fresca en 5 minutos</h1><p>Toca la pantalla para pedir</p></div>`;
   const s=document.getElementById("start");s.onclick=()=>{S.step=1;render()};s.onkeydown=e=>{if(e.key==="Enter")s.click()};return}
- const prog=`<div class="progress" aria-hidden="true">${[1,2,3,4,5,6].map(i=>`<span class="${i<=(S.step===9?5:S.step===5?6:S.step)?"on":""}"></span>`).join("")}</div>`;
+ const prog=`<div class="progress" aria-hidden="true">${[1,2,3,4,5,6].map(i=>`<span class="${i<=(S.step===9?5:S.step===5||S.step===10?6:S.step)?"on":""}"></span>`).join("")}</div>`;
  let body="",foot="";
  const cur=current();const run=total()+(cur?itemPrice(cur):S.pasta?S.pasta.precio:0);
  const footer=(label,ok,next,back)=>`<footer class="bar">${bowl(S.pasta&&S.pasta.color,S.salsa&&S.salsa.color)}<div class="sum"><div class="l1">${S.pasta?S.pasta.nombre+(S.salsa?" · "+S.salsa.nombre:""):"Elige tu pasta"}</div><div class="l2">${clp(run)}</div></div>${back!==undefined?`<button class="btn ghost" data-go="${back}">Volver</button>`:""}<button class="btn go" data-go="${next}" ${ok?"":"disabled"}>${label}</button></footer>`;
@@ -127,15 +135,21 @@ function render(){
    <div class="phone"><div class="n" style="font-weight:800;font-size:20px">Suma sellos con tu celular</div><div class="x" style="font-size:16px;color:var(--gris)">Con 8 sellos, un bowl gratis.</div>
    <div class="num" aria-live="polite">+56 9 ${S.phone.padEnd(8,"·").replace(/(.{4})/,"$1 ")}</div>
    <div class="keys">${[1,2,3,4,5,6,7,8,9,"Borrar",0,"Omitir"].map(k=>`<button class="key" data-k="${k}" style="${typeof k==="string"?"font-size:18px":""}">${k}</button>`).join("")}</div></div>`;
-  foot=`<footer class="bar"><div class="sum"><div class="l1">${cart.length} plato${cart.length>1?"s":""}</div><div class="l2">${clp(total())}</div></div><button class="btn red" data-go="send" ${cart.length?"":"disabled"}>Confirmar pedido</button></footer>`}
- if(S.step===6){body=`<div class="center"><div class="spinner" role="status" aria-label="Enviando"></div><p class="note">Enviando tu pedido a cocina…</p></div>`}
+  foot=`<footer class="bar"><div class="sum"><div class="l1">${cart.length} plato${cart.length>1?"s":""}</div><div class="l2">${clp(total())}</div></div><button class="btn red" data-go="10" ${cart.length?"":"disabled"}>Pagar ${clp(total())}</button></footer>`}
+ if(S.step===10){body=`<div class="center"><span class="sim">Modo simulación · no se cobra</span><h1>¿Cómo pagas?</h1><p class="sub">Total a pagar <b>${clp(total())}</b></p>
+   <div class="grid" style="width:100%">${[["debito","Débito","Tarjeta de débito o prepago"],["credito","Crédito","Tarjeta de crédito"]].map(([m,t,d])=>`<button class="opt" data-pay="${m}"><svg viewBox="0 0 64 40" aria-hidden="true"><rect x="4" y="6" width="56" height="30" rx="5" fill="${m==="debito"?"#00A3B2":"#D6177A"}"/><rect x="4" y="12" width="56" height="6" fill="#06434B" opacity=".5"/><rect x="10" y="24" width="14" height="6" rx="2" fill="#fff"/></svg><span class="t">${t}</span><span class="d">${d}</span></button>`).join("")}</div>
+   <button class="btn ghost" data-go="cash" style="width:100%">Prefiero pagar en caja</button></div>`;
+  foot=`<footer class="bar"><div class="sum"><div class="l1">${cart.length} plato${cart.length>1?"s":""}</div><div class="l2">${clp(total())}</div></div><button class="btn ghost" data-go="5">Volver</button></footer>`}
+ if(S.step===6){body=S.metodo?`<div class="center"><span class="sim">Modo simulación · no se cobra</span><h1>Acerca, inserta o desliza tu tarjeta</h1><p class="sub">${S.metodo==="debito"?"Débito":"Crédito"} · <b>${clp(total())}</b></p>
+   <div class="pos"><div class="scr">${clp(total())}<small>Procesando…</small></div><div class="kp">${"123456789*0#".split("").map(k=>`<i>${k}</i>`).join("")}</div></div>
+   <div class="spinner" role="status" aria-label="Procesando pago"></div></div>`:`<div class="center"><div class="spinner" role="status" aria-label="Enviando"></div><p class="note">Enviando tu pedido a cocina…</p></div>`}
  if(S.step===7){const st=S.res.sellos;const on=st==null?0:(st%8===0&&st>0?8:st%8);
   body=`<div class="center"><p class="sub" style="margin:0">Pedido enviado a cocina. Tu número es</p><div class="orderno">${S.res.numero}</div>${S.res.nombre?`<h1 style="font-size:40px;margin:0">${S.res.nombre}</h1>`:""}
-   <h1 style="font-size:34px">Paga ${clp(S.res.total)} en caja</h1><p class="note">Mira la pantalla de llamados: te llamaremos por número y nombre.</p>
+   ${S.res.pagado?`<h1 style="font-size:34px">Pago aprobado ✓</h1><p class="note">${S.metodo==="debito"?"Débito":"Crédito"} · ${clp(S.res.total)} · simulación</p>`:`<h1 style="font-size:34px">Paga ${clp(S.res.total)} en caja</h1>`}<p class="note">Mira la pantalla de llamados: te llamaremos por número y nombre.</p>
    ${st!=null?`<div class="stamps" aria-label="${on} de 8 sellos">${Array.from({length:8},(_,i)=>`<i class="${i<on?"on":""}"></i>`).join("")}</div><p class="note">Llevas ${st} sello${st===1?"":"s"}.</p>`:""}
    <button class="btn go" data-go="0">Terminar</button></div>`;
   clearTimeout(idle);idle=setTimeout(reset,25000)}
- a.innerHTML=brand()+(S.step<6?prog:"")+`<main>${body}</main>`+foot;
+ a.innerHTML=brand()+(S.step<6||S.step===9||S.step===10?prog:"")+`<main>${body}</main>`+foot;
  a.querySelectorAll("[data-pasta]").forEach(b=>b.onclick=()=>{S.pasta=PASTAS.find(p=>p.codigo===b.dataset.pasta);render()});
  a.querySelectorAll("[data-salsa]").forEach(b=>b.onclick=()=>{S.salsa=SALSAS.find(s=>s.codigo===b.dataset.salsa);render()});
  a.querySelectorAll("[data-modo]").forEach(b=>b.onclick=()=>{S.modo=b.dataset.modo;render()});
@@ -143,10 +157,11 @@ function render(){
  a.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{cart.splice(Number(b.dataset.del),1);if(!cart.length){newItem();S.step=1}render()});
  a.querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>{const l=b.dataset.l;if(l==="del")S.nombre=S.nombre.slice(0,-1);else if(S.nombre.length<20&&!(l===" "&&(!S.nombre||S.nombre.endsWith(" "))))S.nombre=(S.nombre+(S.nombre&&!S.nombre.endsWith(" ")?l.toLowerCase():l));render()});
  a.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{const k=b.dataset.k;if(k==="Borrar")S.phone=S.phone.slice(0,-1);else if(k==="Omitir")S.phone="";else if(S.phone.length<8)S.phone+=k;render()});
+ a.querySelectorAll("[data-pay]").forEach(b=>b.onclick=()=>enviar(b.dataset.pay));
  a.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{const g=b.dataset.go;
   if(g==="add"){cart.push(current());newItem();S.step=!S.modo?4:!S.nombre?9:5}
   else if(g==="more"){newItem();S.step=1}
-  else if(g==="send"){enviar();return}
+  else if(g==="cash"){enviar(null);return}
   else if(g==="0"){reset();return}
   else S.step=Number(g);render()});
 }
