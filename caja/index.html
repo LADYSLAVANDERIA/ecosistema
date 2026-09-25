@@ -4,7 +4,7 @@
 <title>Caja · Pasta al paso</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../base.css?v=4">
+<link rel="stylesheet" href="../base.css?v=5">
 <style>
 body{background:var(--semola)}
 .top{display:flex;align-items:center;gap:14px;padding:14px 22px;background:var(--albahaca);color:var(--semola)}
@@ -17,17 +17,17 @@ h2{margin:0 0 10px;font-size:19px}
 .chip{border:2px solid var(--albahaca);background:transparent;color:var(--albahaca);border-radius:999px;padding:10px 14px;font-weight:700;cursor:pointer}
 .chip.sel{background:var(--albahaca);color:var(--semola)}
 .chip small{font-weight:500}
-.exq{display:inline-flex;align-items:center;gap:6px;border:2px solid #EFD9D2;border-radius:999px;padding:4px 6px 4px 12px}
+.exq{display:inline-flex;align-items:center;gap:6px;border:2px solid #D8EEF1;border-radius:999px;padding:4px 6px 4px 12px}
 .exq button{width:32px;height:32px;border-radius:50%;border:0;background:var(--semola-2);font-weight:800;cursor:pointer}
 .go{border:0;border-radius:999px;padding:14px 22px;background:var(--albahaca);color:var(--semola);font-weight:800;font-size:17px;cursor:pointer}
 .go.red{background:var(--tomate);color:#fff}
 .go:disabled{opacity:.35;cursor:not-allowed}
-.line{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px dashed #EFD9D2}
+.line{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px dashed #D8EEF1}
 .line small{display:block;color:var(--gris)}
 .line button{background:none;border:0;color:var(--tomate);font-weight:700;cursor:pointer;padding:0}
 .total{display:flex;justify-content:space-between;font-size:22px;font-weight:800;padding:12px 0}
 label{display:block;font-weight:700;margin:10px 0 4px}
-input,textarea,select{font:inherit;width:100%;padding:10px 12px;border-radius:10px;border:2px solid #EFD9D2;background:#fff}
+input,textarea,select{font:inherit;width:100%;padding:10px 12px;border-radius:10px;border:2px solid #D8EEF1;background:#fff}
 .seg{display:flex;gap:6px}.seg .chip{flex:1}
 .ok{background:var(--albahaca);color:var(--semola);border-radius:18px;padding:18px;margin-top:14px}
 .ok b.n{font-family:"Young Serif",Georgia,serif;font-weight:400;font-size:54px;display:block;line-height:1}
@@ -37,7 +37,7 @@ input,textarea,select{font:inherit;width:100%;padding:10px 12px;border-radius:10
 @media (max-width:860px){.wrap{grid-template-columns:1fr}}
 </style></head>
 <body><div id="app"></div>
-<script src="../api.js?v=4"></script>
+<script src="../api.js?v=5"></script>
 <script>
 const app=document.getElementById("app");
 let PIN=(new URLSearchParams(location.search).get("k")||localStorage.getItem("eco_pin"))||"",P=[],SA=[],EX=[],cur,cart=[],F={canal:"meson",modo:"llevar",nombre:"",tel:"",dir:"",nota:""},res=null,msg="";

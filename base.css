@@ -1,4 +1,4 @@
-:root{--semola:#FBF1E6;--semola-2:#FBE0E6;--albahaca:#7A1F4F;--albahaca-2:#A8336F;--tomate:#D4541F;--leche:#FFFFFF;--tinta:#7A1F4F;--gris:#7A6470;
+:root{--semola:#F2FBFC;--semola-2:#FDE3F0;--albahaca:#007C89;--albahaca-2:#00A3B2;--tomate:#D6177A;--leche:#FFFFFF;--tinta:#007C89;--gris:#5E7478;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *,*::before,*::after{box-sizing:inherit}
 html,body{height:100%;margin:0;overscroll-behavior:none}

@@ -4,7 +4,7 @@
 <title>Reparto · Pasta al paso</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../base.css?v=4">
+<link rel="stylesheet" href="../base.css?v=5">
 <style>
 body{background:var(--semola)}
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:2;display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--albahaca);color:var(--semola)}
@@ -28,7 +28,7 @@ h2{font-size:18px;margin:18px 4px 8px;display:flex;justify-content:space-between
 .empty{color:var(--gris);padding:4px}
 </style></head>
 <body><div id="app"></div>
-<script src="../api.js?v=4"></script>
+<script src="../api.js?v=5"></script>
 <script>
 const app=document.getElementById("app"),esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let PIN=(new URLSearchParams(location.search).get("k")||localStorage.getItem("eco_pin"))||"",YO=localStorage.getItem("eco_repartidor")||"",list=[],timer,watch=null,last=null,lastSent=0,gpsMsg="",lock=null;
