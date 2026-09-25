@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Llamados · Pasta al paso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../base.css">
+<style>
+body{background:var(--albahaca);color:var(--leche);overflow:hidden}
+.wrap{display:grid;grid-template-columns:1fr 1.6fr;height:100%}
+.col{padding:4vh 3vw;display:flex;flex-direction:column;min-height:0}
+.prep{background:#16291E}
+.ready{background:var(--semola);color:var(--albahaca)}
+h1{margin:0 0 2.5vh;font-family:"Young Serif",Georgia,serif;font-weight:400;font-size:clamp(28px,4vw,64px);line-height:1.05}
+.prep h1{color:var(--semola)}
+.list{display:flex;flex-wrap:wrap;gap:1.4vw;align-content:flex-start;overflow:hidden}
+.prep .t{background:rgba(255,255,255,.08);border-radius:14px;padding:1.2vh 1.4vw;min-width:9vw}
+.prep .t b{display:block;font-size:clamp(26px,3.4vw,56px);line-height:1}
+.prep .t span{font-size:clamp(14px,1.4vw,24px);color:#cfe0d4}
+.ready .t{background:var(--leche);border-radius:22px;padding:2vh 2vw;min-width:16vw;border:4px solid transparent}
+.ready .t b{display:block;font-family:"Young Serif",Georgia,serif;font-weight:400;font-size:clamp(44px,6.5vw,120px);line-height:1}
+.ready .t span{font-size:clamp(20px,2.4vw,44px);font-weight:800}
+.ready .t.new{border-color:var(--tomate);animation:flash 1s ease-in-out 4}
+@keyframes flash{50%{transform:scale(1.05);background:#fff}}
+@media (prefers-reduced-motion: reduce){.ready .t.new{animation:none}}
+.empty{opacity:.7;font-size:clamp(18px,2vw,32px)}
+.overlay{position:fixed;inset:0;background:rgba(22,41,30,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;padding:24px}
+.overlay button{border:0;border-radius:999px;padding:22px 40px;background:var(--semola);color:var(--albahaca);font-weight:800;font-size:26px;cursor:pointer}
+.overlay p{font-size:20px;color:#cfe0d4;max-width:40ch}
+.bottom{position:fixed;left:0;right:0;bottom:0;padding:1vh 2vw;font-size:clamp(12px,1.1vw,18px);color:#9fb5a6;display:flex;justify-content:space-between;pointer-events:none}
+@media (orientation:portrait){.wrap{grid-template-columns:1fr;grid-template-rows:auto 1fr}}
+</style></head>
+<body>
+<div class="wrap"><section class="col prep"><h1>Preparando</h1><div class="list" id="prep"></div></section>
+<section class="col ready"><h1>Listo, retira tu pedido</h1><div class="list" id="ready"></div></section></div>
+<div class="bottom"><span id="st">Conectando…</span><span id="neg"></span></div>
+<div class="overlay" id="ov"><h1 class="serif" style="color:var(--semola)">Pantalla de llamados</h1><button id="go">Activar voz y pantalla</button><p>Toca una vez al encender la pantalla para que el anunciador pueda hablar.</p></div>
+<script src="../api.js"></script>
+<script>
+const esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let called=new Map(),first=true,queue=[],speaking=false,voice=null,timer,fresh=new Set();
+function pickVoice(){const v=speechSynthesis.getVoices();voice=v.find(x=>/es[-_]CL/i.test(x.lang))||v.find(x=>/es[-_](US|MX|419)/i.test(x.lang))||v.find(x=>/^es/i.test(x.lang))||null}
+if("speechSynthesis" in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
+let ctx;function chime(){try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();[660,880,1100].forEach((f,i)=>{const o=ctx.createOscillator(),g=ctx.createGain(),t=ctx.currentTime+i*.16;o.type="sine";o.frequency.value=f;o.connect(g);g.connect(ctx.destination);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.3,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+.5);o.start(t);o.stop(t+.55)})}catch(e){}}
+function say(text){return new Promise(res=>{if(!("speechSynthesis" in window))return res();const u=new SpeechSynthesisUtterance(text);u.lang=voice?voice.lang:"es-CL";if(voice)u.voice=voice;u.rate=.92;u.onend=res;u.onerror=res;speechSynthesis.speak(u);setTimeout(res,9000)})}
+async function run(){if(speaking)return;speaking=true;while(queue.length){const p=queue.shift();chime();await new Promise(r=>setTimeout(r,700));
+ const t=`Número ${p.numero}${p.nombre?", "+p.nombre:""}. Tu pedido está listo.`;await say(t);await new Promise(r=>setTimeout(r,500));await say(t);await new Promise(r=>setTimeout(r,800))}speaking=false}
+async function load(){clearTimeout(timer);
+ try{const d=await ECO.rpc("eco_llamados",{p_negocio:ECO.negocio});draw(d);document.getElementById("st").textContent="En línea"}
+ catch(e){document.getElementById("st").textContent="Sin conexión, reintentando…"}
+ timer=setTimeout(load,3000)}
+function draw(list){
+ const prep=list.filter(p=>p.estado==="preparando"),ready=list.filter(p=>p.estado==="listo").sort((a,b)=>b.llamado-a.llamado);
+ ready.forEach(p=>{const prev=called.get(p.numero);if(prev!==p.llamado){called.set(p.numero,p.llamado);if(!first){queue.push(p);fresh.add(p.numero);setTimeout(()=>fresh.delete(p.numero),8000)}}});
+ first=false;run();
+ document.getElementById("prep").innerHTML=prep.length?prep.map(p=>`<div class="t"><b>${p.numero}</b><span>${esc(p.nombre)}</span></div>`).join(""):`<p class="empty">Sin pedidos en preparación</p>`;
+ document.getElementById("ready").innerHTML=ready.length?ready.map(p=>`<div class="t ${fresh.has(p.numero)?"new":""}"><b>${p.numero}</b><span>${esc(p.nombre)}</span></div>`).join(""):`<p class="empty">Aquí aparece tu número cuando esté listo</p>`;
+}
+document.getElementById("go").onclick=async()=>{document.getElementById("ov").remove();chime();await say("Pantalla de llamados activada.");
+ try{if(navigator.wakeLock)await navigator.wakeLock.request("screen")}catch(e){}
+ try{if(document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen()}catch(e){}};
+document.addEventListener("visibilitychange",async()=>{try{if(document.visibilityState==="visible"&&navigator.wakeLock)await navigator.wakeLock.request("screen")}catch(e){}});
+load();
+</script></body></html>

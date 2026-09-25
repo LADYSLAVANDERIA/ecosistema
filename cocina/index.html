@@ -49,11 +49,12 @@ function draw(list){
  const fresh=list.filter(p=>p.estado==="recibido"&&!seen.has(p.id));fresh.forEach(p=>seen.add(p.id));if(fresh.length&&!first)beep();first=false;
  app.innerHTML=`<header class="top"><h1 class="serif">Cocina</h1><span class="st">${ok?"En línea · "+new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"}):""}</span><button id="out">Salir</button></header>
  <div class="board">${COLS.map(([est,tit,btn])=>{const ps=list.filter(p=>p.estado===est);return `<section class="col"><h2><span>${tit}</span><span>${ps.length}</span></h2><div class="list">${ps.length?ps.map(p=>{const m=mins(p.creado);return `<article class="card ${m>=12?"late":m>=8?"warn":""}">
-  <div class="h"><span class="n">${p.numero}</span><span class="meta">${CANAL[p.canal]||p.canal} · ${p.modo==="llevar"?"Para llevar":p.modo==="despacho"?"Despacho":"Aquí"}<br>hace ${m} min</span></div>
+  <div class="h"><span class="n">${p.numero}${p.nombre?`<small style="display:block;font-family:Figtree,sans-serif;font-size:20px;font-weight:700">${p.nombre}</small>`:""}</span><span class="meta">${CANAL[p.canal]||p.canal} · ${p.modo==="llevar"?"Para llevar":p.modo==="despacho"?"Despacho":"Aquí"}<br>hace ${m} min</span></div>
   <ul>${(p.items||[]).map(i=>`<li><b>${i.pasta}</b> · ${i.salsa}${(i.extras||[]).length?`<small>+ ${i.extras.map(x=>x.nombre+(x.cantidad>1?" x"+x.cantidad:"")).join(", ")}</small>`:""}</li>`).join("")}</ul>
   ${p.nota?`<div class="nota">${p.nota.replace(/</g,"&lt;")}</div>`:""}
-  <div class="acts">${est==="recibido"?`<button class="x" data-id="${p.id}" data-e="cancelado">Anular</button>`:""}<button data-id="${p.id}" data-e="${NEXT[est]}">${btn}</button></div></article>`}).join(""):`<p class="empty">Sin pedidos</p>`}</div></section>`}).join("")}</div>`;
+  <div class="acts">${est==="recibido"?`<button class="x" data-id="${p.id}" data-e="cancelado">Anular</button>`:""}${est==="listo"?`<button class="x" style="color:var(--albahaca);border-color:var(--albahaca)" data-call="${p.id}">Volver a llamar</button>`:""}<button data-id="${p.id}" data-e="${NEXT[est]}">${btn}</button></div></article>`}).join(""):`<p class="empty">Sin pedidos</p>`}</div></section>`}).join("")}</div>`;
  document.getElementById("out").onclick=()=>{sessionStorage.removeItem("eco_pin");PIN="";clearTimeout(timer);login()};
+ app.querySelectorAll("[data-call]").forEach(b=>b.onclick=async()=>{b.disabled=true;try{await ECO.rpc("eco_rellamar",{p_negocio:ECO.negocio,p_pin:PIN,p_pedido:b.dataset.call})}catch(e){alert(e.message)}b.disabled=false});
  app.querySelectorAll("[data-id]").forEach(b=>b.onclick=async()=>{if(b.dataset.e==="cancelado"&&!confirm("¿Anular este pedido?"))return;b.disabled=true;
   try{await ECO.rpc("eco_cambiar_estado",{p_negocio:ECO.negocio,p_pin:PIN,p_pedido:b.dataset.id,p_estado:b.dataset.e});load()}catch(e){alert("No se pudo actualizar: "+e.message);b.disabled=false}});
 }
