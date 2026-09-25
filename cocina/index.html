@@ -4,7 +4,7 @@
 <title>Cocina · Pasta al paso</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../base.css?v=5">
+<link rel="stylesheet" href="../base.css?v=6">
 <style>
 body{background:#06434B}
 .top{display:flex;align-items:center;gap:16px;padding:14px 22px;background:var(--albahaca);color:var(--semola)}
@@ -30,7 +30,7 @@ body{background:#06434B}
 @media (max-width:900px){.board{grid-template-columns:1fr;height:auto}}
 </style></head>
 <body><div id="app" style="height:100%"></div>
-<script src="../api.js?v=5"></script>
+<script src="../api.js?v=6"></script>
 <script>
 const COLS=[["recibido","Nuevos","Empezar"],["en_cocina","En cocina","Listo"],["listo","Listos para entregar","Entregado"]];
 const NEXT={recibido:"en_cocina",en_cocina:"listo",listo:"entregado"};

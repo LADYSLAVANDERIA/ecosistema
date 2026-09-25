@@ -4,7 +4,7 @@
 <title>Llamados · Pasta al paso</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../base.css?v=5">
+<link rel="stylesheet" href="../base.css?v=6">
 <style>
 body{background:var(--albahaca);color:var(--leche);overflow:hidden}
 .wrap{display:grid;grid-template-columns:1fr 1.6fr;height:100%}
@@ -35,7 +35,7 @@ h1{margin:0 0 2.5vh;font-family:"Young Serif",Georgia,serif;font-weight:400;font
 <section class="col ready"><h1>Listo, retira tu pedido</h1><div class="list" id="ready"></div></section></div>
 <div class="bottom"><span id="st">Conectando…</span><span id="neg"></span></div>
 <div class="overlay" id="ov"><h1 class="serif" style="color:var(--semola)">Pantalla de llamados</h1><button id="go">Activar voz y pantalla</button><p>Toca una vez al encender la pantalla para que el anunciador pueda hablar.</p></div>
-<script src="../api.js?v=5"></script>
+<script src="../api.js?v=6"></script>
 <script>
 const esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let called=new Map(),first=true,queue=[],speaking=false,voice=null,timer,fresh=new Set();

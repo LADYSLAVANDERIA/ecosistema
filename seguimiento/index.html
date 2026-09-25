@@ -5,7 +5,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<link rel="stylesheet" href="../base.css?v=5">
+<link rel="stylesheet" href="../base.css?v=6">
 <style>
 body{background:var(--semola)}
 header.top{padding:18px 20px;background:var(--albahaca);color:var(--semola)}
@@ -31,7 +31,7 @@ ol li.todo b{color:var(--gris);font-weight:500}
 </style></head>
 <body><header class="top"><b id="neg">Tu pedido</b></header><main id="app"><p>Cargando…</p></main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="../api.js?v=5"></script>
+<script src="../api.js?v=6"></script>
 <script>
 const T=new URLSearchParams(location.search).get("t")||"",app=document.getElementById("app"),esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let map,marker,timer;
@@ -52,7 +52,11 @@ function draw(d){
   ${d.estado==="en_ruta"&&d.lat?`<div id="map" role="img" aria-label="Mapa con la ubicación del repartidor"></div><p class="upd">Ubicación del repartidor actualizada a las ${hh(d.pos_en)}</p>`:d.estado==="en_ruta"?`<p class="upd">El repartidor está saliendo; el mapa aparece en cuanto comparta su ubicación.</p>`:""}`;
  map=null;if(d.estado==="en_ruta"&&d.lat&&window.L){map=L.map("map",{zoomControl:false,attributionControl:true}).setView([d.lat,d.lng],15);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(map);
-  L.marker([d.lat,d.lng],{icon:L.divIcon({className:"",html:'<div class="moto">🛵</div>',iconSize:[34,34],iconAnchor:[17,17]})}).addTo(map)}
+  L.marker([d.lat,d.lng],{icon:L.divIcon({className:"",html:'<div class="moto">🛵</div>',iconSize:[34,34],iconAnchor:[17,17]})}).addTo(map);
+  if(d.dest_lat!=null){L.marker([d.dest_lat,d.dest_lng],{icon:L.divIcon({className:"",html:'<div class="moto">📍</div>',iconSize:[34,34],iconAnchor:[17,30]})}).addTo(map);
+   map.fitBounds([[d.lat,d.lng],[d.dest_lat,d.dest_lng]],{padding:[50,50],maxZoom:16});
+   const km=(()=>{const R=6371,t=x=>x*Math.PI/180,a=t(d.dest_lat-d.lat),b=t(d.dest_lng-d.lng),h=Math.sin(a/2)**2+Math.cos(t(d.lat))*Math.cos(t(d.dest_lat))*Math.sin(b/2)**2;return 2*R*Math.asin(Math.sqrt(h))})();
+   const u=document.querySelector(".upd");if(u)u.textContent+=` · a unos ${km<1?Math.round(km*1000)+" m":km.toFixed(1)+" km"} de tu dirección`}}
 }
 T?load():app.innerHTML=`<div class="hero"><h1>Falta el código del pedido</h1><p>Abre el enlace que te enviamos por WhatsApp.</p></div>`;
 </script></body></html>

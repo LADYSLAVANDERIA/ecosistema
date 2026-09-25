@@ -1,76 +1,165 @@
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Reparto · Pasta al paso</title>
+<title>Despacho y rutas · Pasta al paso</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../base.css?v=5">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="../base.css?v=6">
 <style>
 body{background:var(--semola)}
-.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:2;display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--albahaca);color:var(--semola)}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:500;display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--albahaca);color:var(--semola)}
 .top h1{margin:0;font-size:22px;flex:1}
 .top button{border:2px solid var(--semola);background:transparent;color:var(--semola);border-radius:999px;padding:6px 12px;cursor:pointer;font-weight:700}
 .gps{padding:10px 16px;font-weight:700;font-size:15px}
 .gps.on{background:#DDF2E3;color:#1D5E36}.gps.off{background:var(--semola-2);color:var(--tomate)}
-main{padding:12px 14px 40px;max-width:640px;margin:0 auto}
-h2{font-size:18px;margin:18px 4px 8px;display:flex;justify-content:space-between}
-.card{background:var(--leche);border-radius:16px;padding:14px;margin-bottom:10px;border-left:8px solid var(--albahaca)}
+.gps:empty{display:none}
+#map{height:min(48vh,460px);background:#D8EEF1}
+.ctl{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 14px;max-width:760px;margin:0 auto}
+.ctl button,.ctl a{display:flex;align-items:center;justify-content:center;border:0;border-radius:12px;padding:14px 8px;font-weight:800;font-size:16px;text-decoration:none;cursor:pointer;background:var(--semola-2);color:var(--albahaca);text-align:center}
+.ctl .main{background:var(--albahaca);color:var(--semola)}
+.ctl .hot{background:var(--tomate);color:#fff}
+.ctl button:disabled{opacity:.4;cursor:not-allowed}
+.sum{grid-column:1/-1;background:#fff;border-radius:12px;padding:10px 14px;font-weight:700;color:var(--albahaca)}
+.sum:empty{display:none}
+main{padding:0 14px 40px;max-width:760px;margin:0 auto}
+h2{font-size:18px;margin:16px 4px 8px;display:flex;justify-content:space-between}
+.card{background:var(--leche);border-radius:16px;padding:14px;margin-bottom:10px;border-left:8px solid var(--albahaca);display:grid;grid-template-columns:auto 1fr;gap:4px 12px}
 .card.ruta{border-left-color:var(--tomate)}.card.done{opacity:.6}
-.card .h{display:flex;justify-content:space-between;align-items:baseline}
-.card .n{font-family:"Young Serif",Georgia,serif;font-size:32px}
-.card .dir{font-size:18px;font-weight:700;margin:6px 0}
-.card .meta{color:var(--gris);font-size:15px}
-.card .nota{background:var(--semola-2);border-radius:8px;padding:6px 10px;margin-top:6px;font-size:15px}
-.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-.acts a,.acts button{display:flex;align-items:center;justify-content:center;border:0;border-radius:12px;padding:13px 8px;font-weight:800;font-size:15px;text-decoration:none;cursor:pointer;background:var(--semola-2);color:var(--albahaca)}
-.acts .main{grid-column:1/-1;background:var(--albahaca);color:var(--semola);font-size:17px}
-.acts .red{grid-column:1/-1;background:var(--tomate);color:#fff;font-size:17px}
+.pin{grid-row:span 3;width:40px;height:40px;border-radius:50%;background:var(--tomate);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px}
+.pin.off{background:#C9D6D8}
+.card .t{font-weight:800;font-size:17px}
+.card .dir{font-size:16px}
+.card .meta{color:var(--gris);font-size:14px}
+.card .warn{color:var(--tomate);font-weight:700;font-size:14px}
+.card .nota{background:var(--semola-2);border-radius:8px;padding:6px 10px;font-size:14px}
+.acts{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.acts a,.acts button{display:flex;align-items:center;justify-content:center;border:0;border-radius:10px;padding:11px 4px;font-weight:800;font-size:14px;text-decoration:none;cursor:pointer;background:var(--semola-2);color:var(--albahaca)}
+.acts .wide{grid-column:1/-1;background:var(--tomate);color:#fff;font-size:16px;padding:13px}
+.acts .loc{grid-column:1/-1;background:#fff;border:2px dashed var(--tomate);color:var(--tomate)}
 .empty{color:var(--gris);padding:4px}
+.mk{width:30px;height:30px;border-radius:50%;background:#D6177A;color:#fff;border:3px solid #fff;display:flex;align-items:center;justify-content:center;font:800 14px Figtree,sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.mk.r{background:#007C89}
+.emo{font-size:28px;line-height:1;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+.picking #map{outline:5px solid var(--tomate);outline-offset:-5px;cursor:crosshair}
 </style></head>
-<body><div id="app"></div>
-<script src="../api.js?v=5"></script>
+<body>
+<header class="top"><h1 class="serif" id="ttl">Despacho y rutas</h1><button id="cambiar">Cambiar repartidor</button></header>
+<div class="gps" id="gps"></div>
+<div id="map" role="application" aria-label="Mapa de la ruta de despacho"></div>
+<div class="ctl"><div class="sum" id="sum"></div>
+ <button class="main" id="opt">Optimizar ruta</button>
+ <button class="hot" id="ini" disabled>Iniciar ruta</button>
+ <a id="gmaps" target="_blank" rel="noopener">Ruta completa en Google Maps</a>
+ <button id="movlocal">Ubicar el local en el mapa</button>
+</div>
+<main id="list"><p class="empty">Cargando…</p></main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="../api.js?v=6"></script>
 <script>
-const app=document.getElementById("app"),esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-let PIN=(new URLSearchParams(location.search).get("k")||localStorage.getItem("eco_pin"))||"",YO=localStorage.getItem("eco_repartidor")||"",list=[],timer,watch=null,last=null,lastSent=0,gpsMsg="",lock=null;
-function login(m){app.innerHTML=`<div class="pinbox"><form id="f"><h1 class="serif">¿Quién reparte hoy?</h1><input id="y" placeholder="Tu nombre" value="${esc(YO)}" maxlength="30" style="letter-spacing:0;font-size:22px"><p class="err">${m||""}</p><button>Entrar</button></form></div>`;
- document.getElementById("f").onsubmit=e=>{e.preventDefault();YO=document.getElementById("y").value.trim();if(!YO)return login("Escribe tu nombre");localStorage.setItem("eco_repartidor",YO);load()}}
+const esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const PIN="";let YO=localStorage.getItem("eco_repartidor")||"";
+let list=[],ORIG=null,route=null,routeKey="",timer,watch=null,last=null,lastSent=0,gpsMsg="",lock=null,picking=null,geoBusy=false,failed=new Set();
 const trackUrl=t=>new URL("../seguimiento/?t="+t,location.href).href;
+const $=id=>document.getElementById(id);
+// ---------- mapa ----------
+const map=L.map("map",{zoomControl:true}).setView([-32.93,-71.52],14);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(map);
+const layer=L.layerGroup().addTo(map);let line=null,me=null,fitted=false;
+const icon=(html,cls,size=30)=>L.divIcon({className:"",html:`<div class="${cls}">${html}</div>`,iconSize:[size,size],iconAnchor:[size/2,size/2]});
+map.on("click",async e=>{if(!picking)return;const {lat,lng}=e.latlng;const p=picking;picking=null;document.body.classList.remove("picking");
+ try{if(p==="local"){await ECO.rpc("eco_fijar_origen",{p_negocio:ECO.negocio,p_pin:PIN,p_lat:lat,p_lng:lng});ORIG={...ORIG,lat,lng}}
+  else{await ECO.rpc("eco_fijar_destino",{p_negocio:ECO.negocio,p_pin:PIN,p_pedido:p,p_lat:lat,p_lng:lng});failed.delete(p)}routeKey="";load()}catch(x){alert(x.message)}});
+// ---------- geocodificación (OpenStreetMap, 1 consulta por segundo) ----------
+async function geocode(q){const full=/conc[oó]n|re[ñn]aca|vi[ñn]a|quintero/i.test(q)?q+", Chile":q+", Concón, Chile";
+ const u="https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=cl&viewbox=-71.62,-32.86,-71.44,-33.05&q="+encodeURIComponent(full);
+ const r=await fetch(u,{headers:{"Accept-Language":"es"}});const d=await r.json();return d&&d[0]?{lat:+d[0].lat,lng:+d[0].lon}:null}
+async function geoPending(){if(geoBusy)return;geoBusy=true;
+ try{if(ORIG&&ORIG.lat==null&&ORIG.direccion){const g=await geocode(ORIG.direccion);if(g){await ECO.rpc("eco_fijar_origen",{p_negocio:ECO.negocio,p_pin:PIN,p_lat:g.lat,p_lng:g.lng});ORIG={...ORIG,...g}}await sleep(1100)}
+  for(const p of list.filter(p=>p.dest_lat==null&&p.direccion&&!failed.has(p.id)&&p.estado!=="entregado")){
+   const g=await geocode(p.direccion).catch(()=>null);
+   if(g){await ECO.rpc("eco_fijar_destino",{p_negocio:ECO.negocio,p_pin:PIN,p_pedido:p.id,p_lat:g.lat,p_lng:g.lng});p.dest_lat=g.lat;p.dest_lng=g.lng}else failed.add(p.id);
+   await sleep(1100)}}
+ finally{geoBusy=false;draw()}}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+// ---------- optimización de ruta ----------
+const stops=()=>list.filter(p=>(p.estado==="listo"||(p.estado==="en_ruta"&&p.repartidor===YO))&&p.dest_lat!=null);
+const hav=(a,b)=>{const R=6371,t=x=>x*Math.PI/180,dl=t(b.lat-a.lat),dg=t(b.lng-a.lng),s=Math.sin(dl/2)**2+Math.cos(t(a.lat))*Math.cos(t(b.lat))*Math.sin(dg/2)**2;return 2*R*Math.asin(Math.sqrt(s))};
+async function optimize(){const S=stops();if(!ORIG||ORIG.lat==null||!S.length){route=null;draw();return}
+ const key=S.map(p=>p.id+p.dest_lat+p.dest_lng).join("|")+ORIG.lat;routeKey=key;$("opt").disabled=true;$("opt").textContent="Calculando…";
+ const pts=[{lat:ORIG.lat,lng:ORIG.lng},...S.map(p=>({lat:p.dest_lat,lng:p.dest_lng}))];
+ try{const c=pts.map(p=>p.lng.toFixed(6)+","+p.lat.toFixed(6)).join(";");
+  const r=await fetch(`https://router.project-osrm.org/trip/v1/driving/${c}?source=first&roundtrip=true&geometries=geojson&overview=full`);const d=await r.json();
+  if(d.code!=="Ok")throw 0;const ord=S.map((p,i)=>({p,k:d.waypoints[i+1].waypoint_index})).sort((a,b)=>a.k-b.k).map(x=>x.p);
+  route={order:ord,geo:d.trips[0].geometry.coordinates.map(([x,y])=>[y,x]),km:d.trips[0].distance/1000,min:d.trips[0].duration/60,exact:true}}
+ catch(e){// respaldo: vecino más cercano en línea recta
+  let cur=pts[0],rest=[...S],ord=[],km=0;while(rest.length){rest.sort((a,b)=>hav(cur,{lat:a.dest_lat,lng:a.dest_lng})-hav(cur,{lat:b.dest_lat,lng:b.dest_lng}));const n=rest.shift();km+=hav(cur,{lat:n.dest_lat,lng:n.dest_lng});cur={lat:n.dest_lat,lng:n.dest_lng};ord.push(n)}
+  km+=hav(cur,pts[0]);route={order:ord,geo:[[pts[0].lat,pts[0].lng],...ord.map(p=>[p.dest_lat,p.dest_lng]),[pts[0].lat,pts[0].lng]],km:km*1.3,min:km*1.3/25*60,exact:false}}
+ $("opt").disabled=false;$("opt").textContent="Optimizar ruta";fitted=false;draw()}
+// ---------- GPS ----------
 const mine=()=>list.filter(p=>p.estado==="en_ruta"&&p.repartidor===YO);
-async function load(){clearTimeout(timer);
- try{list=await ECO.rpc("eco_reparto",{p_negocio:ECO.negocio,p_pin:PIN});localStorage.setItem("eco_pin",PIN);draw();gps()}
- catch(e){if(/PIN/.test(e.message)){localStorage.removeItem("eco_pin");return login("PIN incorrecto")}gpsMsg="Sin conexión, reintentando…"}
- timer=setTimeout(load,8000)}
 function gps(){const need=mine().length>0;
  if(need&&watch===null){if(!navigator.geolocation){gpsMsg="Este teléfono no permite GPS";return}
-  watch=navigator.geolocation.watchPosition(p=>{last=p.coords;gpsMsg="";send()},e=>{gpsMsg=e.code===1?"Activa el permiso de ubicación para compartir tu ruta":"Buscando señal GPS…";draw()},{enableHighAccuracy:true,maximumAge:5000,timeout:20000});
+  watch=navigator.geolocation.watchPosition(p=>{last=p.coords;gpsMsg="";send();drawMe()},e=>{gpsMsg=e.code===1?"Activa el permiso de ubicación para compartir tu ruta":"Buscando señal GPS…";banner()},{enableHighAccuracy:true,maximumAge:5000,timeout:20000});
   try{navigator.wakeLock&&navigator.wakeLock.request("screen").then(l=>lock=l)}catch(e){}}
  if(!need&&watch!==null){navigator.geolocation.clearWatch(watch);watch=null;last=null;try{lock&&lock.release()}catch(e){}}}
 async function send(force){if(!last)return;const ids=mine().map(p=>p.id);if(!ids.length)return;if(!force&&Date.now()-lastSent<12000)return;lastSent=Date.now();
- try{await ECO.rpc("eco_posicion",{p_negocio:ECO.negocio,p_pin:PIN,p_pedidos:ids,p_lat:last.latitude,p_lng:last.longitude});draw()}catch(e){}}
-async function estado(id,e){try{await ECO.rpc("eco_cambiar_estado",{p_negocio:ECO.negocio,p_pin:PIN,p_pedido:id,p_estado:e,p_repartidor:YO});await load();if(e==="en_ruta")send(true)}catch(x){alert("No se pudo actualizar: "+x.message)}}
-function card(p){const d=encodeURIComponent(p.direccion||"");const wa=p.telefono?`https://wa.me/${p.telefono}?text=${encodeURIComponent(`Hola ${p.nombre||""}! Tu pedido #${p.numero} va en camino 🛵 Síguelo en vivo: ${trackUrl(p.token)}`)}`:"";
- return `<article class="card ${p.estado==="en_ruta"?"ruta":p.estado==="entregado"?"done":""}"><div class="h"><span class="n">${p.numero}</span><span class="meta">${esc(p.nombre)} · ${clp(p.total)}</span></div>
- <div class="dir">${esc(p.direccion)}</div>${p.repartidor&&p.estado==="en_ruta"?`<div class="meta">En ruta con ${esc(p.repartidor)}</div>`:""}${p.nota?`<div class="nota">${esc(p.nota)}</div>`:""}
- ${p.estado==="entregado"?"":`<div class="acts">
-  ${p.estado==="listo"?`<button class="main" data-e="en_ruta" data-id="${p.id}">Salir a ruta</button>`:""}
-  ${p.estado==="en_ruta"&&p.repartidor===YO?`<button class="red" data-e="entregado" data-id="${p.id}">Entregado</button>`:""}
-  <a href="https://www.google.com/maps/dir/?api=1&destination=${d}" target="_blank" rel="noopener">Google Maps</a>
-  <a href="https://waze.com/ul?q=${d}&navigate=yes" target="_blank" rel="noopener">Waze</a>
-  ${p.telefono?`<a href="tel:+${p.telefono}">Llamar</a>`:""}${wa?`<a href="${wa}" target="_blank" rel="noopener">WhatsApp</a>`:""}
- </div>`}</article>`}
-function draw(){const g={listo:[],en_ruta:[],prep:[],entregado:[]};list.forEach(p=>{(p.estado==="recibido"||p.estado==="en_cocina"?g.prep:g[p.estado]).push(p)});
- const sharing=watch!==null&&last;const m=mine().length;
- app.innerHTML=`<header class="top"><h1 class="serif">Reparto · ${esc(YO)}</h1><button id="cambiar">Cambiar repartidor</button></header>
- ${m?`<div class="gps ${sharing&&!gpsMsg?"on":"off"}">${gpsMsg||(sharing?`Compartiendo ubicación con ${m} cliente${m>1?"s":""}. Mantén esta pantalla abierta.`:"Activando GPS…")}</div>`:""}
- <main>
-  <h2><span>En ruta</span><span>${g.en_ruta.length}</span></h2>${g.en_ruta.map(card).join("")||`<p class="empty">Nadie en ruta.</p>`}
-  <h2><span>Listos para salir</span><span>${g.listo.length}</span></h2>${g.listo.map(card).join("")||`<p class="empty">Sin pedidos listos.</p>`}
-  <h2><span>En cocina</span><span>${g.prep.length}</span></h2>${g.prep.map(p=>`<article class="card"><div class="h"><span class="n">${p.numero}</span><span class="meta">${esc(p.nombre)}</span></div><div class="meta">${esc(p.direccion)}</div></article>`).join("")||`<p class="empty">Nada en preparación.</p>`}
-  ${g.entregado.length?`<h2><span>Entregados (30 min)</span><span>${g.entregado.length}</span></h2>${g.entregado.map(card).join("")}`:""}
- </main>`;
- document.getElementById("cambiar").onclick=()=>{clearTimeout(timer);login()};
- app.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>{if(b.dataset.e==="entregado"&&!confirm("¿Confirmas que entregaste el pedido?"))return;b.disabled=true;estado(b.dataset.id,b.dataset.e)});
-}
+ try{await ECO.rpc("eco_posicion",{p_negocio:ECO.negocio,p_pin:PIN,p_pedidos:ids,p_lat:last.latitude,p_lng:last.longitude})}catch(e){}}
 setInterval(()=>send(),15000);
-YO?load():login();
+function drawMe(){if(!last){if(me){map.removeLayer(me);me=null}return}const ll=[last.latitude,last.longitude];if(me)me.setLatLng(ll);else me=L.marker(ll,{icon:icon("🛵","emo",34),zIndexOffset:1000}).addTo(map)}
+function banner(){const m=mine().length;$("gps").className="gps "+(last&&!gpsMsg?"on":"off");$("gps").textContent=m?(gpsMsg||(last?`Compartiendo tu ubicación con ${m} cliente${m>1?"s":""}. Mantén esta pantalla abierta.`:"Activando GPS…")):""}
+// ---------- datos ----------
+async function load(){clearTimeout(timer);
+ try{if(!ORIG)ORIG=await ECO.rpc("eco_origen",{p_negocio:ECO.negocio});list=await ECO.rpc("eco_reparto",{p_negocio:ECO.negocio,p_pin:PIN});
+  const S=stops(),key=S.map(p=>p.id+p.dest_lat+p.dest_lng).join("|")+(ORIG&&ORIG.lat);if(key!==routeKey)optimize();
+  draw();gps();geoPending()}catch(e){$("gps").className="gps off";$("gps").textContent="Sin conexión, reintentando…"}
+ timer=setTimeout(load,8000)}
+async function estado(id,e){try{await ECO.rpc("eco_cambiar_estado",{p_negocio:ECO.negocio,p_pin:PIN,p_pedido:id,p_estado:e,p_repartidor:YO})}catch(x){alert("No se pudo actualizar: "+x.message)}}
+// ---------- dibujo ----------
+function draw(){
+ $("ttl").textContent="Despacho · "+YO;banner();
+ layer.clearLayers();if(line){map.removeLayer(line);line=null}
+ const bounds=[];
+ if(ORIG&&ORIG.lat!=null){layer.addLayer(L.marker([ORIG.lat,ORIG.lng],{icon:icon("🏠","emo",34)}).bindPopup("Local"));bounds.push([ORIG.lat,ORIG.lng])}
+ const ord=route?route.order.filter(p=>list.some(q=>q.id===p.id&&(q.estado==="listo"||q.estado==="en_ruta"))):[];
+ const idx=new Map(ord.map((p,i)=>[p.id,i+1]));
+ list.filter(p=>p.dest_lat!=null&&(p.estado==="listo"||p.estado==="en_ruta")).forEach(p=>{const n=idx.get(p.id)||"•";
+  layer.addLayer(L.marker([p.dest_lat,p.dest_lng],{icon:icon(n,"mk"+(p.estado==="en_ruta"?" r":""))}).bindPopup(`<b>${p.numero} · ${esc(p.nombre)}</b><br>${esc(p.direccion)}`));bounds.push([p.dest_lat,p.dest_lng])});
+ if(route&&route.geo.length)line=L.polyline(route.geo,{color:"#007C89",weight:5,opacity:.85,dashArray:route.exact?null:"8 8"}).addTo(map);
+ if(!fitted&&bounds.length){bounds.length>1?map.fitBounds(bounds,{padding:[40,40]}):map.setView(bounds[0],15);fitted=true}
+ drawMe();
+ $("sum").textContent=route&&ord.length?`${ord.length} parada${ord.length>1?"s":""} · ${route.km.toFixed(1)} km · ~${Math.round(route.min)} min ida y vuelta${route.exact?"":" (estimado en línea recta)"}`:ORIG&&ORIG.lat==null?"Ubicando el local en el mapa…":"";
+ const listos=ord.filter(p=>p.estado==="listo");$("ini").disabled=!listos.length;$("ini").textContent=listos.length?`Iniciar ruta (${listos.length})`:"Iniciar ruta";
+ if(ORIG&&ORIG.lat!=null&&ord.length){const w=ord.map(p=>p.dest_lat+","+p.dest_lng);$("gmaps").href=`https://www.google.com/maps/dir/?api=1&travelmode=driving&origin=${last?last.latitude+","+last.longitude:ORIG.lat+","+ORIG.lng}&destination=${ORIG.lat},${ORIG.lng}&waypoints=${encodeURIComponent(w.join("|"))}`;$("gmaps").style.opacity=1}else{$("gmaps").removeAttribute("href");$("gmaps").style.opacity=.4}
+ const card=(p,n)=>{const d=encodeURIComponent(p.direccion||"");const wa=p.telefono?`https://wa.me/${p.telefono}?text=${encodeURIComponent(`Hola ${p.nombre||""}! Tu pedido #${p.numero} va en camino 🛵 Síguelo en vivo: ${trackUrl(p.token)}`)}`:"";
+  return `<article class="card ${p.estado==="en_ruta"?"ruta":p.estado==="entregado"?"done":""}"><span class="pin ${n?"":"off"}">${n||"–"}</span>
+   <div class="t">${p.numero} · ${esc(p.nombre)}</div><div class="dir">${esc(p.direccion)}</div>
+   <div>${p.dest_lat==null?`<span class="warn">${failed.has(p.id)?"No encontramos la dirección en el mapa":"Buscando la dirección en el mapa…"}</span>`:`<span class="meta">${p.estado==="en_ruta"?"En ruta con "+esc(p.repartidor):p.estado==="listo"?"Listo para salir":p.estado==="entregado"?"Entregado":"En cocina"} · ${clp(p.total)}</span>`}</div>
+   ${p.nota?`<div class="nota" style="grid-column:1/-1">${esc(p.nota)}</div>`:""}
+   ${p.estado==="entregado"?"":`<div class="acts">
+    ${p.estado==="en_ruta"&&p.repartidor===YO?`<button class="wide" data-e="entregado" data-id="${p.id}">Entregado</button>`:""}
+    ${p.estado!=="entregado"&&(failed.has(p.id)||p.dest_lat!=null)?`<button class="loc" data-pick="${p.id}">${p.dest_lat==null?"Marcar la dirección en el mapa":"Corregir ubicación en el mapa"}</button>`:""}
+    <a href="https://waze.com/ul?${p.dest_lat!=null?"ll="+p.dest_lat+","+p.dest_lng:"q="+d}&navigate=yes" target="_blank" rel="noopener">Waze</a>
+    <a href="https://www.google.com/maps/dir/?api=1&destination=${p.dest_lat!=null?p.dest_lat+","+p.dest_lng:d}" target="_blank" rel="noopener">Maps</a>
+    ${p.telefono?`<a href="tel:+${p.telefono}">Llamar</a>`:"<span></span>"}${wa?`<a href="${wa}" target="_blank" rel="noopener">WhatsApp</a>`:"<span></span>"}
+   </div>`}</article>`};
+ const enRutaOtros=list.filter(p=>p.estado==="en_ruta"&&p.repartidor!==YO);
+ const sinUbic=list.filter(p=>(p.estado==="listo"||(p.estado==="en_ruta"&&p.repartidor===YO))&&p.dest_lat==null);
+ const prep=list.filter(p=>p.estado==="recibido"||p.estado==="en_cocina");const done=list.filter(p=>p.estado==="entregado");
+ $("list").innerHTML=`<h2><span>Mi ruta, en orden</span><span>${ord.length}</span></h2>${ord.map((p,i)=>card(p,i+1)).join("")||`<p class="empty">No hay pedidos listos para despacho.</p>`}
+  ${sinUbic.length?`<h2><span>Sin ubicación</span><span>${sinUbic.length}</span></h2>${sinUbic.map(p=>card(p)).join("")}`:""}
+  ${enRutaOtros.length?`<h2><span>En ruta con otro repartidor</span><span>${enRutaOtros.length}</span></h2>${enRutaOtros.map(p=>card(p)).join("")}`:""}
+  <h2><span>En cocina</span><span>${prep.length}</span></h2>${prep.map(p=>card(p)).join("")||`<p class="empty">Nada en preparación.</p>`}
+  ${done.length?`<h2><span>Entregados (30 min)</span><span>${done.length}</span></h2>${done.map(p=>card(p)).join("")}`:""}`;
+ document.querySelectorAll("[data-e]").forEach(b=>b.onclick=async()=>{if(!confirm("¿Confirmas que entregaste el pedido?"))return;b.disabled=true;await estado(b.dataset.id,"entregado");load()});
+ document.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{picking=b.dataset.pick;document.body.classList.add("picking");window.scrollTo({top:0,behavior:"smooth"});alert("Toca en el mapa el punto exacto de entrega.")});
+}
+$("opt").onclick=()=>{routeKey="";optimize()};
+$("ini").onclick=async()=>{const ls=(route?route.order:[]).filter(p=>p.estado==="listo");if(!ls.length)return;$("ini").disabled=true;
+ for(const p of ls)await estado(p.id,"en_ruta");await load();send(true);
+ const w=ls.filter(p=>p.telefono);if(w.length)alert(`Ruta iniciada. Envía el seguimiento a ${w.length} cliente${w.length>1?"s":""} con el botón WhatsApp de cada pedido.`)};
+$("movlocal").onclick=()=>{picking="local";document.body.classList.add("picking");window.scrollTo({top:0,behavior:"smooth"});alert("Toca en el mapa la ubicación exacta del local.")};
+$("cambiar").onclick=()=>{const n=prompt("Nombre del repartidor",YO);if(n&&n.trim()){YO=n.trim();localStorage.setItem("eco_repartidor",YO);routeKey="";load()}};
+if(!YO){const n=prompt("¿Quién reparte hoy? Escribe tu nombre")||"Repartidor";YO=n.trim()||"Repartidor";localStorage.setItem("eco_repartidor",YO)}
+load();
 </script></body></html>

@@ -4,7 +4,7 @@
 <title>Caja · Pasta al paso</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../base.css?v=5">
+<link rel="stylesheet" href="../base.css?v=6">
 <style>
 body{background:var(--semola)}
 .top{display:flex;align-items:center;gap:14px;padding:14px 22px;background:var(--albahaca);color:var(--semola)}
@@ -37,7 +37,7 @@ input,textarea,select{font:inherit;width:100%;padding:10px 12px;border-radius:10
 @media (max-width:860px){.wrap{grid-template-columns:1fr}}
 </style></head>
 <body><div id="app"></div>
-<script src="../api.js?v=5"></script>
+<script src="../api.js?v=6"></script>
 <script>
 const app=document.getElementById("app");
 let PIN=(new URLSearchParams(location.search).get("k")||localStorage.getItem("eco_pin"))||"",P=[],SA=[],EX=[],cur,cart=[],F={canal:"meson",modo:"llevar",nombre:"",tel:"",dir:"",nota:""},res=null,msg="";
