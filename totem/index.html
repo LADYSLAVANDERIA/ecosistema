@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tótem · Pasta al paso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --semola:#F4D35E; --semola-2:#FBE9A6; --albahaca:#1E3A2A; --albahaca-2:#2C5540;
+  --tomate:#C8372D; --leche:#FFFCF2; --tinta:#1E3A2A; --gris:#5E6B61;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --leche:#F7F2E1; } }
+:root[data-theme="dark"]{ --leche:#F7F2E1; }
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%;margin:0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--albahaca);color:var(--tinta);font-family:Figtree,system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;justify-content:center}
+.kiosk{width:100%;max-width:760px;height:100%;background:var(--semola);display:flex;flex-direction:column;overflow:hidden;position:relative}
+header.top{display:flex;align-items:center;justify-content:space-between;padding:20px 28px;background:var(--albahaca);color:var(--semola)}
+.brand{font-family:"Young Serif",Georgia,serif;font-size:28px}
+.brand small{display:block;font-family:Figtree,sans-serif;font-size:13px;color:#cfe0d4;margin-top:2px}
+.lang{font-size:15px;color:#cfe0d4}
+.progress{display:flex;gap:6px;padding:14px 28px 0}
+.progress span{flex:1;height:6px;border-radius:3px;background:rgba(30,58,42,.18)}
+.progress span.on{background:var(--albahaca)}
+main{flex:1;overflow-y:auto;padding:18px 28px 24px}
+h1{font-family:"Young Serif",Georgia,serif;font-weight:400;font-size:clamp(34px,6vw,52px);line-height:1.05;margin:6px 0 6px}
+.sub{font-size:19px;color:var(--albahaca-2);margin:0 0 20px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.opt{appearance:none;border:3px solid transparent;background:var(--leche);border-radius:22px;padding:18px;text-align:left;font:inherit;color:inherit;cursor:pointer;display:flex;flex-direction:column;gap:6px;min-height:150px}
+.opt:focus-visible,.btn:focus-visible,.key:focus-visible{outline:4px solid var(--tomate);outline-offset:3px}
+.opt.sel{border-color:var(--albahaca);background:#fff}
+.opt .t{font-weight:800;font-size:22px}
+.opt .d{font-size:16px;color:var(--gris);line-height:1.35}
+.opt .p{margin-top:auto;font-weight:700;font-size:20px}
+.opt svg{width:64px;height:40px}
+.row{display:flex;gap:14px}
+.qty{display:flex;align-items:center;gap:10px;margin-top:auto}
+.qty button{width:44px;height:44px;border-radius:50%;border:2px solid var(--albahaca);background:transparent;font-size:24px;font-weight:700;color:var(--albahaca);cursor:pointer}
+.qty b{min-width:22px;text-align:center;font-size:20px}
+footer.bar{display:flex;gap:12px;align-items:center;padding:16px 28px 22px;background:var(--semola-2);border-top:2px solid rgba(30,58,42,.12)}
+.bowl{width:86px;height:64px;flex:none}
+.sum{flex:1;min-width:0}
+.sum .l1{font-weight:700;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sum .l2{font-size:24px;font-weight:800}
+.btn{appearance:none;border:0;border-radius:999px;padding:20px 30px;font:inherit;font-weight:800;font-size:21px;cursor:pointer}
+.btn.go{background:var(--albahaca);color:var(--semola)}
+.btn.go[disabled]{opacity:.35;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--albahaca);border:3px solid var(--albahaca)}
+.btn.red{background:var(--tomate);color:#fff}
+.attract{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 28px;cursor:pointer;gap:18px}
+.attract h1{font-size:clamp(44px,9vw,76px)}
+.attract .big{width:min(70%,380px);height:auto}
+.attract p{font-size:21px;margin:0;color:var(--albahaca-2)}
+.pulse{animation:pulse 2.2s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.04)}}
+@media (prefers-reduced-motion: reduce){.pulse{animation:none}}
+.line{display:flex;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:2px dashed rgba(30,58,42,.2);font-size:19px}
+.line .n{font-weight:700}
+.line .x{color:var(--gris);font-size:16px}
+.line button{background:none;border:0;color:var(--tomate);font:inherit;font-size:16px;font-weight:700;cursor:pointer;padding:0}
+.total{display:flex;justify-content:space-between;font-size:26px;font-weight:800;padding:16px 0}
+.phone{background:var(--leche);border-radius:22px;padding:18px;margin-top:10px}
+.phone .num{font-size:30px;font-weight:800;letter-spacing:1px;min-height:40px}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.key{border:0;border-radius:16px;background:var(--semola-2);font:inherit;font-size:26px;font-weight:700;padding:14px 0;cursor:pointer;color:var(--tinta)}
+.center{text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px;padding-top:30px}
+.card{width:min(100%,360px);aspect-ratio:1.6;border-radius:22px;background:var(--albahaca);color:var(--semola);display:flex;flex-direction:column;justify-content:space-between;padding:22px;text-align:left}
+.orderno{font-family:"Young Serif",Georgia,serif;font-size:120px;line-height:1;color:var(--albahaca)}
+.stamps{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.stamps i{width:34px;height:34px;border-radius:50%;border:3px solid var(--albahaca)}
+.stamps i.on{background:var(--tomate);border-color:var(--tomate)}
+.note{font-size:17px;color:var(--gris);max-width:30ch}
+.spinner{width:64px;height:64px;border-radius:50%;border:7px solid rgba(30,58,42,.2);border-top-color:var(--albahaca);animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.proto{position:absolute;right:10px;bottom:6px;font-size:12px;color:rgba(30,58,42,.55)}
+@media (max-width:480px){.grid{grid-template-columns:1fr}.opt{min-height:0}.btn{padding:16px 22px;font-size:18px}}
+</style></head>
+<body><div class="kiosk" id="app"><main><p class="sub">Cargando carta…</p></main></div>
+<script src="../api.js"></script>
+<script>let PASTAS=[],SALSAS=[],EXTRAS=[],NOMBRE="Pasta al paso";
+let S,cart,idle;
+function reset(){S={step:0,pasta:null,salsa:null,extras:{},modo:null,phone:"",err:""};cart=[];render()}
+function newItem(){S.pasta=null;S.salsa=null;S.extras={}}
+function itemPrice(it){return it.pasta.precio+it.salsa.precio+Object.entries(it.extras).reduce((a,[k,q])=>a+EXTRAS.find(e=>e.codigo===k).precio*q,0)}
+function current(){return S.pasta&&S.salsa?{pasta:S.pasta,salsa:S.salsa,extras:{...S.extras}}:null}
+function total(){return cart.reduce((a,i)=>a+itemPrice(i),0)}
+function bowl(pc,sc,cls){return `<svg class="${cls||"bowl"}" viewBox="0 0 120 90" aria-hidden="true"><ellipse cx="60" cy="32" rx="52" ry="14" fill="${pc||"#FFFCF2"}"/>${sc?`<ellipse cx="48" cy="30" rx="18" ry="6" fill="${sc}"/><ellipse cx="72" cy="33" rx="14" ry="5" fill="${sc}"/>`:""}<path d="M8 32 Q60 110 112 32" fill="#FFFCF2" stroke="#1E3A2A" stroke-width="4"/><ellipse cx="60" cy="32" rx="52" ry="14" fill="none" stroke="#1E3A2A" stroke-width="4"/></svg>`}
+function poke(){clearTimeout(idle);if(S&&S.step>0&&S.step<7)idle=setTimeout(reset,90000)}
+const brand=()=>`<header class="top"><div class="brand">${NOMBRE}<small>Pasta fresca al paso</small></div></header>`;
+async function enviar(){
+  S.step=6;S.err="";render();
+  try{
+    const items=cart.map(i=>({pasta:i.pasta.codigo,salsa:i.salsa.codigo,extras:Object.entries(i.extras).filter(([,q])=>q).map(([codigo,cantidad])=>({codigo,cantidad}))}));
+    const r=await ECO.rpc("eco_crear_pedido",{p_negocio:ECO.negocio,p_canal:"totem",p_modo:S.modo,p_items:items,p_telefono:S.phone.length===8?S.phone:null});
+    S.res=r;S.step=7;render();
+  }catch(e){S.err="No pudimos enviar tu pedido. Intenta de nuevo o pide en caja.";S.step=5;render()}
+}
+function render(){
+ poke();const a=document.getElementById("app");
+ if(S.step===0){a.innerHTML=brand()+`<div class="attract" id="start" role="button" tabindex="0" aria-label="Empezar pedido">${bowl("#E9C46A","#C8372D","big pulse")}<h1>Tu pasta fresca en 5 minutos</h1><p>Toca la pantalla para pedir</p></div>`;
+  const s=document.getElementById("start");s.onclick=()=>{S.step=1;render()};s.onkeydown=e=>{if(e.key==="Enter")s.click()};return}
+ const prog=`<div class="progress" aria-hidden="true">${[1,2,3,4,5].map(i=>`<span class="${i<=S.step?"on":""}"></span>`).join("")}</div>`;
+ let body="",foot="";
+ const cur=current();const run=total()+(cur?itemPrice(cur):S.pasta?S.pasta.precio:0);
+ const footer=(label,ok,next,back)=>`<footer class="bar">${bowl(S.pasta&&S.pasta.color,S.salsa&&S.salsa.color)}<div class="sum"><div class="l1">${S.pasta?S.pasta.nombre+(S.salsa?" · "+S.salsa.nombre:""):"Elige tu pasta"}</div><div class="l2">${clp(run)}</div></div>${back!==undefined?`<button class="btn ghost" data-go="${back}">Volver</button>`:""}<button class="btn go" data-go="${next}" ${ok?"":"disabled"}>${label}</button></footer>`;
+ if(S.step===1){body=`<h1>Elige tu pasta</h1><p class="sub">Hecha hoy, en este local.</p><div class="grid">${PASTAS.map(p=>`<button class="opt ${S.pasta===p?"sel":""}" data-pasta="${p.codigo}">${bowl(p.color)}<span class="t">${p.nombre}</span><span class="d">${p.descripcion||""}</span><span class="p">${clp(p.precio)}</span></button>`).join("")}</div>`;
+  foot=footer("Elegir salsa",!!S.pasta,2,cart.length?5:0)}
+ if(S.step===2){body=`<h1>Elige la salsa</h1><p class="sub">Las salsas sin precio van incluidas.</p><div class="grid">${SALSAS.map(s=>`<button class="opt ${S.salsa===s?"sel":""}" data-salsa="${s.codigo}"><svg viewBox="0 0 64 40" aria-hidden="true"><circle cx="20" cy="20" r="16" fill="${s.color||"#ccc"}" stroke="#1E3A2A" stroke-width="2"/></svg><span class="t">${s.nombre}</span><span class="d">${s.descripcion||""}</span><span class="p">${s.precio?"+ "+clp(s.precio):"Incluida"}</span></button>`).join("")}</div>`;
+  foot=footer("Agregar extras",!!S.salsa,3,1)}
+ if(S.step===3){body=`<h1>¿Algo más encima?</h1><p class="sub">Opcional. Puedes seguir sin extras.</p><div class="grid">${EXTRAS.map(e=>{const q=S.extras[e.codigo]||0;return `<div class="opt ${q?"sel":""}"><span class="t">${e.nombre}</span><span class="p">+ ${clp(e.precio)}</span><div class="qty"><button data-ex="${e.codigo}" data-d="-1" aria-label="Quitar ${e.nombre}">−</button><b>${q}</b><button data-ex="${e.codigo}" data-d="1" aria-label="Agregar ${e.nombre}">+</button></div></div>`}).join("")}</div>`;
+  foot=footer("Agregar al pedido",true,"add",2)}
+ if(S.step===4){body=`<h1>¿Aquí o para llevar?</h1><p class="sub">Para llevar va en bowl con tapa y bolsa.</p><div class="grid">${[["aqui","Comer aquí","En bowl, listo en mesón"],["llevar","Para llevar","Bowl con tapa y bolsa"]].map(([id,t,d])=>`<button class="opt ${S.modo===id?"sel":""}" data-modo="${id}"><span class="t">${t}</span><span class="d">${d}</span></button>`).join("")}</div>`;
+  foot=`<footer class="bar"><div class="sum"><div class="l1">${cart.length} plato${cart.length>1?"s":""}</div><div class="l2">${clp(total())}</div></div><button class="btn go" data-go="5" ${S.modo?"":"disabled"}>Revisar pedido</button></footer>`}
+ if(S.step===5){body=`<h1>Tu pedido</h1>${S.err?`<p class="sub" style="color:var(--tomate);font-weight:700">${S.err}</p>`:""}${cart.map((i,k)=>`<div class="line"><div><div class="n">${i.pasta.nombre} · ${i.salsa.nombre}</div><div class="x">${Object.entries(i.extras).filter(([,q])=>q).map(([c,q])=>EXTRAS.find(e=>e.codigo===c).nombre+(q>1?" x"+q:"")).join(", ")||"Sin extras"}</div><button data-del="${k}">Quitar</button></div><div class="n">${clp(itemPrice(i))}</div></div>`).join("")}
+   <div class="total"><span>Total · ${S.modo==="llevar"?"para llevar":"comer aquí"}</span><span>${clp(total())}</span></div>
+   <button class="btn ghost" data-go="more" style="width:100%">Agregar otro plato</button>
+   <div class="phone"><div class="n" style="font-weight:800;font-size:20px">Suma sellos con tu celular</div><div class="x" style="font-size:16px;color:var(--gris)">Con 8 sellos, un bowl gratis.</div>
+   <div class="num" aria-live="polite">+56 9 ${S.phone.padEnd(8,"·").replace(/(.{4})/,"$1 ")}</div>
+   <div class="keys">${[1,2,3,4,5,6,7,8,9,"Borrar",0,"Omitir"].map(k=>`<button class="key" data-k="${k}" style="${typeof k==="string"?"font-size:18px":""}">${k}</button>`).join("")}</div></div>`;
+  foot=`<footer class="bar"><div class="sum"><div class="l1">${cart.length} plato${cart.length>1?"s":""}</div><div class="l2">${clp(total())}</div></div><button class="btn red" data-go="send" ${cart.length?"":"disabled"}>Confirmar pedido</button></footer>`}
+ if(S.step===6){body=`<div class="center"><div class="spinner" role="status" aria-label="Enviando"></div><p class="note">Enviando tu pedido a cocina…</p></div>`}
+ if(S.step===7){const st=S.res.sellos;const on=st==null?0:(st%8===0&&st>0?8:st%8);
+  body=`<div class="center"><p class="sub" style="margin:0">Pedido enviado a cocina. Tu número es</p><div class="orderno">${S.res.numero}</div>
+   <h1 style="font-size:34px">Paga ${clp(S.res.total)} en caja</h1><p class="note">Te llamamos por tu número cuando esté listo.</p>
+   ${st!=null?`<div class="stamps" aria-label="${on} de 8 sellos">${Array.from({length:8},(_,i)=>`<i class="${i<on?"on":""}"></i>`).join("")}</div><p class="note">Llevas ${st} sello${st===1?"":"s"}.</p>`:""}
+   <button class="btn go" data-go="0">Terminar</button></div>`;
+  clearTimeout(idle);idle=setTimeout(reset,25000)}
+ a.innerHTML=brand()+(S.step<6?prog:"")+`<main>${body}</main>`+foot;
+ a.querySelectorAll("[data-pasta]").forEach(b=>b.onclick=()=>{S.pasta=PASTAS.find(p=>p.codigo===b.dataset.pasta);render()});
+ a.querySelectorAll("[data-salsa]").forEach(b=>b.onclick=()=>{S.salsa=SALSAS.find(s=>s.codigo===b.dataset.salsa);render()});
+ a.querySelectorAll("[data-modo]").forEach(b=>b.onclick=()=>{S.modo=b.dataset.modo;render()});
+ a.querySelectorAll("[data-ex]").forEach(b=>b.onclick=()=>{const id=b.dataset.ex;S.extras[id]=Math.max(0,Math.min(3,(S.extras[id]||0)+Number(b.dataset.d)));render()});
+ a.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{cart.splice(Number(b.dataset.del),1);if(!cart.length){newItem();S.step=1}render()});
+ a.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{const k=b.dataset.k;if(k==="Borrar")S.phone=S.phone.slice(0,-1);else if(k==="Omitir")S.phone="";else if(S.phone.length<8)S.phone+=k;render()});
+ a.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{const g=b.dataset.go;
+  if(g==="add"){cart.push(current());newItem();S.step=S.modo?5:4}
+  else if(g==="more"){newItem();S.step=1}
+  else if(g==="send"){enviar();return}
+  else if(g==="0"){reset();return}
+  else S.step=Number(g);render()});
+}
+["pointerdown","keydown"].forEach(ev=>document.addEventListener(ev,poke));
+(async()=>{try{const c=await ECO.rpc("eco_carta",{p_negocio:ECO.negocio});NOMBRE=c.negocio||NOMBRE;
+  PASTAS=c.productos.filter(p=>p.tipo==="pasta");SALSAS=c.productos.filter(p=>p.tipo==="salsa");EXTRAS=c.productos.filter(p=>p.tipo==="extra");reset()}
+ catch(e){document.getElementById("app").innerHTML='<main><h1>Tótem fuera de servicio</h1><p class="sub">No hay conexión con el sistema. Pide en caja.</p></main>';setTimeout(()=>location.reload(),30000)}})();
+</script></body></html>

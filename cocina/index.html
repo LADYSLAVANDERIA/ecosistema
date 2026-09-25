@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cocina · Pasta al paso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../base.css">
+<style>
+body{background:#16291E}
+.top{display:flex;align-items:center;gap:16px;padding:14px 22px;background:var(--albahaca);color:var(--semola)}
+.top h1{margin:0;font-size:26px;flex:1}
+.top .st{font-size:15px;color:#cfe0d4}
+.top button{border:2px solid var(--semola);background:transparent;color:var(--semola);border-radius:999px;padding:8px 16px;cursor:pointer;font-weight:700}
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:14px;height:calc(100% - 64px)}
+.col{background:rgba(255,255,255,.05);border-radius:18px;display:flex;flex-direction:column;min-height:0}
+.col h2{margin:0;padding:14px 16px;color:var(--semola);font-size:20px;display:flex;justify-content:space-between}
+.list{overflow-y:auto;padding:0 12px 12px;display:flex;flex-direction:column;gap:12px}
+.card{background:var(--leche);border-radius:16px;padding:14px 16px;border-left:10px solid var(--albahaca)}
+.card.warn{border-left-color:#E09F3E}.card.late{border-left-color:var(--tomate)}
+.card .h{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.card .n{font-family:"Young Serif",Georgia,serif;font-size:40px;line-height:1}
+.card .meta{font-size:15px;color:var(--gris);text-align:right}
+.card ul{margin:10px 0;padding-left:20px;font-size:19px;line-height:1.35}
+.card li small{display:block;color:var(--gris);font-size:15px}
+.card .nota{background:var(--semola-2);border-radius:8px;padding:6px 10px;font-size:15px;margin-bottom:8px}
+.card .acts{display:flex;gap:8px}
+.card .acts button{flex:1;border:0;border-radius:12px;padding:14px;font-weight:800;font-size:17px;cursor:pointer;background:var(--albahaca);color:var(--semola)}
+.card .acts button.x{flex:0 0 auto;background:transparent;color:var(--tomate);border:2px solid var(--tomate)}
+.empty{color:#9fb5a6;padding:10px 6px;font-size:16px}
+@media (max-width:900px){.board{grid-template-columns:1fr;height:auto}}
+</style></head>
+<body><div id="app" style="height:100%"></div>
+<script src="../api.js"></script>
+<script>
+const COLS=[["recibido","Nuevos","Empezar"],["en_cocina","En cocina","Listo"],["listo","Listos para entregar","Entregado"]];
+const NEXT={recibido:"en_cocina",en_cocina:"listo",listo:"entregado"};
+const CANAL={totem:"Tótem",meson:"Mesón",whatsapp:"WhatsApp",web:"Web",pedidosya:"PedidosYa",rappi:"Rappi",ubereats:"Uber Eats"};
+let PIN=sessionStorage.getItem("eco_pin")||"",seen=new Set(),first=true,timer,ok=true;
+const app=document.getElementById("app");
+function beep(){try{const c=new (window.AudioContext||window.webkitAudioContext)();[0,.18].forEach(t=>{const o=c.createOscillator(),g=c.createGain();o.frequency.value=880;o.connect(g);g.connect(c.destination);g.gain.setValueAtTime(.25,c.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+t+.15);o.start(c.currentTime+t);o.stop(c.currentTime+t+.16)})}catch(e){}}
+function login(msg){app.innerHTML=`<div class="pinbox"><form id="f"><h1 class="serif">Pantalla de cocina</h1><input id="p" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="PIN" aria-label="PIN de 6 dígitos"><p class="err">${msg||""}</p><button>Entrar</button></form></div>`;
+ document.getElementById("p").focus();document.getElementById("f").onsubmit=e=>{e.preventDefault();PIN=document.getElementById("p").value.trim();load()}}
+async function load(){clearTimeout(timer);
+ try{const d=await ECO.rpc("eco_cocina",{p_negocio:ECO.negocio,p_pin:PIN});sessionStorage.setItem("eco_pin",PIN);ok=true;draw(d)}
+ catch(e){if(/PIN/.test(e.message)){sessionStorage.removeItem("eco_pin");return login("PIN incorrecto")}ok=false;const s=document.querySelector(".st");if(s)s.textContent="Sin conexión, reintentando…"}
+ timer=setTimeout(load,3000)}
+function mins(t){return Math.floor((Date.now()-new Date(t))/60000)}
+function draw(list){
+ const fresh=list.filter(p=>p.estado==="recibido"&&!seen.has(p.id));fresh.forEach(p=>seen.add(p.id));if(fresh.length&&!first)beep();first=false;
+ app.innerHTML=`<header class="top"><h1 class="serif">Cocina</h1><span class="st">${ok?"En línea · "+new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"}):""}</span><button id="out">Salir</button></header>
+ <div class="board">${COLS.map(([est,tit,btn])=>{const ps=list.filter(p=>p.estado===est);return `<section class="col"><h2><span>${tit}</span><span>${ps.length}</span></h2><div class="list">${ps.length?ps.map(p=>{const m=mins(p.creado);return `<article class="card ${m>=12?"late":m>=8?"warn":""}">
+  <div class="h"><span class="n">${p.numero}</span><span class="meta">${CANAL[p.canal]||p.canal} · ${p.modo==="llevar"?"Para llevar":p.modo==="despacho"?"Despacho":"Aquí"}<br>hace ${m} min</span></div>
+  <ul>${(p.items||[]).map(i=>`<li><b>${i.pasta}</b> · ${i.salsa}${(i.extras||[]).length?`<small>+ ${i.extras.map(x=>x.nombre+(x.cantidad>1?" x"+x.cantidad:"")).join(", ")}</small>`:""}</li>`).join("")}</ul>
+  ${p.nota?`<div class="nota">${p.nota.replace(/</g,"&lt;")}</div>`:""}
+  <div class="acts">${est==="recibido"?`<button class="x" data-id="${p.id}" data-e="cancelado">Anular</button>`:""}<button data-id="${p.id}" data-e="${NEXT[est]}">${btn}</button></div></article>`}).join(""):`<p class="empty">Sin pedidos</p>`}</div></section>`}).join("")}</div>`;
+ document.getElementById("out").onclick=()=>{sessionStorage.removeItem("eco_pin");PIN="";clearTimeout(timer);login()};
+ app.querySelectorAll("[data-id]").forEach(b=>b.onclick=async()=>{if(b.dataset.e==="cancelado"&&!confirm("¿Anular este pedido?"))return;b.disabled=true;
+  try{await ECO.rpc("eco_cambiar_estado",{p_negocio:ECO.negocio,p_pin:PIN,p_pedido:b.dataset.id,p_estado:b.dataset.e});load()}catch(e){alert("No se pudo actualizar: "+e.message);b.disabled=false}});
+}
+PIN?load():login();
+</script></body></html>
