@@ -4,7 +4,7 @@
 <title>Cocina · Pasta al paso</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../base.css">
+<link rel="stylesheet" href="../base.css?v=4">
 <style>
 body{background:#3D1029}
 .top{display:flex;align-items:center;gap:16px;padding:14px 22px;background:var(--albahaca);color:var(--semola)}
@@ -30,7 +30,7 @@ body{background:#3D1029}
 @media (max-width:900px){.board{grid-template-columns:1fr;height:auto}}
 </style></head>
 <body><div id="app" style="height:100%"></div>
-<script src="../api.js"></script>
+<script src="../api.js?v=4"></script>
 <script>
 const COLS=[["recibido","Nuevos","Empezar"],["en_cocina","En cocina","Listo"],["listo","Listos para entregar","Entregado"]];
 const NEXT={recibido:"en_cocina",en_cocina:"listo",listo:"entregado"};
@@ -58,5 +58,5 @@ function draw(list){
  app.querySelectorAll("[data-id]").forEach(b=>b.onclick=async()=>{if(b.dataset.e==="cancelado"&&!confirm("¿Anular este pedido?"))return;b.disabled=true;
   try{await ECO.rpc("eco_cambiar_estado",{p_negocio:ECO.negocio,p_pin:PIN,p_pedido:b.dataset.id,p_estado:b.dataset.e});load()}catch(e){alert("No se pudo actualizar: "+e.message);b.disabled=false}});
 }
-PIN?load():login();
+load();
 </script></body></html>

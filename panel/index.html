@@ -4,7 +4,7 @@
 <title>Panel · Pasta al paso</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../base.css">
+<link rel="stylesheet" href="../base.css?v=4">
 <style>
 body{background:var(--leche)}
 .top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:16px 24px;background:var(--albahaca);color:var(--semola)}
@@ -32,7 +32,7 @@ td.r,th.r{text-align:right}
 @media (max-width:760px){.row{grid-template-columns:1fr}}
 </style></head>
 <body><div id="app"></div>
-<script src="../api.js"></script>
+<script src="../api.js?v=4"></script>
 <script>
 const CANAL={totem:"Tótem",meson:"Mesón",whatsapp:"WhatsApp",web:"Web",pedidosya:"PedidosYa",rappi:"Rappi",ubereats:"Uber Eats"};
 const app=document.getElementById("app");
@@ -60,12 +60,12 @@ function draw(d){
    <section><h2>Platos más pedidos</h2>${(d.top||[]).length?`<table>${d.top.map(t=>`<tr><td>${t.plato}</td><td class="r">${t.cantidad}</td></tr>`).join("")}</table>`:`<p class="muted">Aún no hay ventas este día.</p>`}</section>
   </div>
   <section style="margin-top:22px"><h2>Pedidos por hora</h2>${horas.length?`<div class="bars">${horas.map(([h,n])=>`<div class="bar"><span>${n}</span><i style="height:${Math.round(n/mx*120)}px"></i><span>${h}:00</span></div>`).join("")}</div>`:`<p class="muted">Aún no hay ventas este día.</p>`}</section>
-  <section style="margin-top:22px"><h2>Cambiar PIN</h2><div class="pinform"><input id="np" inputmode="numeric" maxlength="6" placeholder="Nuevo PIN" aria-label="Nuevo PIN de 6 dígitos"><button id="cp">Guardar PIN</button><span id="cpm" class="muted"></span></div><p class="muted">El mismo PIN abre la cocina y este panel.</p></section>
+  <section hidden><h2>Cambiar PIN</h2><div class="pinform"><input id="np" inputmode="numeric" maxlength="6" placeholder="Nuevo PIN" aria-label="Nuevo PIN de 6 dígitos"><button id="cp">Guardar PIN</button><span id="cpm" class="muted"></span></div><p class="muted">El mismo PIN abre la cocina y este panel.</p></section>
  </main>`;
  document.getElementById("fecha").onchange=e=>{FECHA=e.target.value;load()};
  document.getElementById("out").onclick=()=>{localStorage.removeItem("eco_pin");PIN="";clearTimeout(timer);login()};
  document.getElementById("cp").onclick=async()=>{const n=document.getElementById("np").value.trim(),m=document.getElementById("cpm");
   try{await ECO.rpc("eco_cambiar_pin",{p_negocio:ECO.negocio,p_pin:PIN,p_nuevo:n});PIN=n;localStorage.setItem("eco_pin",n);m.textContent="PIN guardado."}catch(e){m.textContent=e.message}};
 }
-PIN?load():login();
+load();
 </script></body></html>

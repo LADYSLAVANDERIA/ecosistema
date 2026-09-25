@@ -1,7 +1,8 @@
 :root{--semola:#FBF1E6;--semola-2:#FBE0E6;--albahaca:#7A1F4F;--albahaca-2:#A8336F;--tomate:#D4541F;--leche:#FFFFFF;--tinta:#7A1F4F;--gris:#7A6470;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *,*::before,*::after{box-sizing:inherit}
-html,body{height:100%;margin:0}
+html,body{height:100%;margin:0;overscroll-behavior:none}
+body{touch-action:manipulation}
 body{font-family:Figtree,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--tinta)}
 .serif{font-family:"Young Serif",Georgia,serif;font-weight:400}
 button{font:inherit}

@@ -4,7 +4,7 @@
 <title>Reparto · Pasta al paso</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../base.css">
+<link rel="stylesheet" href="../base.css?v=4">
 <style>
 body{background:var(--semola)}
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:2;display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--albahaca);color:var(--semola)}
@@ -28,12 +28,12 @@ h2{font-size:18px;margin:18px 4px 8px;display:flex;justify-content:space-between
 .empty{color:var(--gris);padding:4px}
 </style></head>
 <body><div id="app"></div>
-<script src="../api.js"></script>
+<script src="../api.js?v=4"></script>
 <script>
 const app=document.getElementById("app"),esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let PIN=(new URLSearchParams(location.search).get("k")||localStorage.getItem("eco_pin"))||"",YO=localStorage.getItem("eco_repartidor")||"",list=[],timer,watch=null,last=null,lastSent=0,gpsMsg="",lock=null;
-function login(m){app.innerHTML=`<div class="pinbox"><form id="f"><h1 class="serif">Reparto</h1><input id="y" placeholder="Tu nombre" value="${esc(YO)}" maxlength="30" style="letter-spacing:0;font-size:22px"><input id="p" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="PIN" aria-label="PIN de 6 dígitos"><p class="err">${m||""}</p><button>Entrar</button></form></div>`;
- document.getElementById("f").onsubmit=e=>{e.preventDefault();YO=document.getElementById("y").value.trim();PIN=document.getElementById("p").value.trim();if(!YO)return login("Escribe tu nombre");localStorage.setItem("eco_repartidor",YO);load()}}
+function login(m){app.innerHTML=`<div class="pinbox"><form id="f"><h1 class="serif">¿Quién reparte hoy?</h1><input id="y" placeholder="Tu nombre" value="${esc(YO)}" maxlength="30" style="letter-spacing:0;font-size:22px"><p class="err">${m||""}</p><button>Entrar</button></form></div>`;
+ document.getElementById("f").onsubmit=e=>{e.preventDefault();YO=document.getElementById("y").value.trim();if(!YO)return login("Escribe tu nombre");localStorage.setItem("eco_repartidor",YO);load()}}
 const trackUrl=t=>new URL("../seguimiento/?t="+t,location.href).href;
 const mine=()=>list.filter(p=>p.estado==="en_ruta"&&p.repartidor===YO);
 async function load(){clearTimeout(timer);
@@ -60,7 +60,7 @@ function card(p){const d=encodeURIComponent(p.direccion||"");const wa=p.telefono
  </div>`}</article>`}
 function draw(){const g={listo:[],en_ruta:[],prep:[],entregado:[]};list.forEach(p=>{(p.estado==="recibido"||p.estado==="en_cocina"?g.prep:g[p.estado]).push(p)});
  const sharing=watch!==null&&last;const m=mine().length;
- app.innerHTML=`<header class="top"><h1 class="serif">Reparto · ${esc(YO)}</h1><button id="out">Salir</button></header>
+ app.innerHTML=`<header class="top"><h1 class="serif">Reparto · ${esc(YO)}</h1><button id="cambiar">Cambiar repartidor</button></header>
  ${m?`<div class="gps ${sharing&&!gpsMsg?"on":"off"}">${gpsMsg||(sharing?`Compartiendo ubicación con ${m} cliente${m>1?"s":""}. Mantén esta pantalla abierta.`:"Activando GPS…")}</div>`:""}
  <main>
   <h2><span>En ruta</span><span>${g.en_ruta.length}</span></h2>${g.en_ruta.map(card).join("")||`<p class="empty">Nadie en ruta.</p>`}
@@ -68,9 +68,9 @@ function draw(){const g={listo:[],en_ruta:[],prep:[],entregado:[]};list.forEach(
   <h2><span>En cocina</span><span>${g.prep.length}</span></h2>${g.prep.map(p=>`<article class="card"><div class="h"><span class="n">${p.numero}</span><span class="meta">${esc(p.nombre)}</span></div><div class="meta">${esc(p.direccion)}</div></article>`).join("")||`<p class="empty">Nada en preparación.</p>`}
   ${g.entregado.length?`<h2><span>Entregados (30 min)</span><span>${g.entregado.length}</span></h2>${g.entregado.map(card).join("")}`:""}
  </main>`;
- document.getElementById("out").onclick=()=>{localStorage.removeItem("eco_pin");PIN="";clearTimeout(timer);login()};
+ document.getElementById("cambiar").onclick=()=>{clearTimeout(timer);login()};
  app.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>{if(b.dataset.e==="entregado"&&!confirm("¿Confirmas que entregaste el pedido?"))return;b.disabled=true;estado(b.dataset.id,b.dataset.e)});
 }
 setInterval(()=>send(),15000);
-PIN&&YO?load():login();
+YO?load():login();
 </script></body></html>
